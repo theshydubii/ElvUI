@@ -1544,9 +1544,6 @@ function CH:MessageFormatter(frame, info, chatType, chatGroup, chatTarget, chann
 	local playerLinkDisplayText = coloredName
 	local defaultLanguage = GetDefaultLanguage('player')
 	local relevantDefaultLanguage = frame.defaultLanguage or defaultLanguage
-	if chatType == 'SAY' or chatType == 'YELL' then
-		relevantDefaultLanguage = frame.alternativeDefaultLanguage or defaultLanguage
-	end
 
 	local usingEmote = (chatType == 'EMOTE') or (chatType == 'TEXT_EMOTE')
 	local usingDifferentLanguage = (arg3 ~= '') and (arg3 ~= relevantDefaultLanguage)
