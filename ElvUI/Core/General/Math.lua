@@ -238,6 +238,7 @@ end
 
 function E:GetFormattedText(style, min, max, dec, short)
 	if max == 0 then max = 1 end
+	if short == nil then short = true end -- Passes the 5th arguement true by default
 
 	if style == 'CURRENT' or ((style == 'CURRENT_MAX' or style == 'CURRENT_MAX_PERCENT' or style == 'CURRENT_PERCENT') and min == max) then
 		return format(E.GetFormattedTextStyles.CURRENT, short and E:ShortValue(min, dec) or BreakUpLargeNumbers(min))
