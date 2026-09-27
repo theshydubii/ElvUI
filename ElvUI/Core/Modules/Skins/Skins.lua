@@ -113,15 +113,11 @@ function S:HandleButtonHighlight(frame, r, g, b)
 	end
 
 	if not frame.highlightGradient then
-		local width, h = frame:GetSize()
-		local height = h * 0.95
-
-		local gradient = frame:CreateTexture(nil, 'HIGHLIGHT')
-		gradient:SetTexture(E.Media.Textures.Highlight)
-		gradient:Point('LEFT', frame)
-		gradient:Size(width, height)
-
-		frame.highlightGradient = gradient
+ 		local gradient = frame:CreateTexture(nil, 'HIGHLIGHT')
+ 		gradient:SetTexture(E.Media.Textures.Highlight)
+ 		gradient:SetAllPoints(frame)
+ 
+ 		frame.highlightGradient = gradient
 	end
 
 	if not r then r = 0.9 end
