@@ -73,7 +73,7 @@ function E:AddTag(tagName, eventsOrSeconds, func, block, spells)
 	if type(eventsOrSeconds) == 'number' then
 		Tags.OnUpdateThrottle[tagName] = eventsOrSeconds
 	else
-		Tags.Events[tagName] = 'UNIT_HEALTH'
+		Tags.Events[tagName] = eventsOrSeconds -- every string-based event argument was hardcoded to 'UNIT_HEALTH'
 	end
 
 	-- we need to trigger the newindex on oUF side to set the env
