@@ -56,6 +56,7 @@ local C_NewItems_RemoveNewItem = LC.C_NewItems.RemoveNewItem
 local EditBox_HighlightText = EditBox_HighlightText
 local BankFrameItemButton_UpdateLocked = BankFrameItemButton_UpdateLocked
 local BankFrame_UpdateCooldown = BankFrame_UpdateCooldown
+local BankButtonIDToInvSlotID = BankButtonIDToInvSlotID
 
 local ContainerIDToInventoryID = ContainerIDToInventoryID
 local GetContainerItemCooldown = GetContainerItemCooldown
@@ -389,7 +390,7 @@ function B:UpdateAllSlots(frame, first)
 			B:SetBagAssignments(holder)
 		end
 
-		B:UpdateBagSlots(frame, bagID)
+		B:UpdateBagSlots(frame, bagID, true)
 	end
 end
 
@@ -397,7 +398,7 @@ function B:UpdateAllBagSlots()
 	if not E.private.bags.enable then return end
 
 	for _, bagFrame in pairs(B.BagFrames) do
-		B:UpdateAllSlots(bagFrame)
+		B:UpdateAllSlots(bagFrame, true)
 	end
 end
 
@@ -483,18 +484,65 @@ function B:UpdateSlotColors(slot, isQuestItem, questId, isActiveQuest)
 	end
 end
 
-function B:GetBindTypeText(itemLink)
+function B:GetBindTypeText(itemLink, bagID, slotID)
+	if not itemLink then return end
+
 	local bindType
-	local itemInfo = E.ScanTooltip:GetHyperlinkInfo(itemLink)
-	if itemInfo then
-		for i = 2, BIND do
-			local line = itemInfo.lines[i]
-			bindType = line and line.leftText
-			if B.BindText[bindType] then break end
+	local tooltip = E.ScanTooltip
+	local tooltipName = tooltip:GetName()
+
+	if bagID and slotID then
+		tooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+		tooltip:ClearLines()
+
+		if bagID == BANK_CONTAINER then
+			local invID = BankButtonIDToInvSlotID(slotID, false)
+			tooltip:SetInventoryItem('player', invID)
+		else
+			tooltip:SetBagItem(bagID, slotID)
 		end
 
-		return B.BindText[bindType]
+		local numLines = tooltip:NumLines()
+		if numLines and numLines > 1 then
+			for i = 2, (numLines > BIND and BIND or numLines) do
+				local line = _G[tooltipName..'TextLeft'..i]
+				local text = line and line:GetText()
+				if text and text ~= '' then
+					
+					if text == _G.ITEM_SOULBOUND or text == _G.ITEM_BIND_QUEST then
+						tooltip:Hide()
+						return nil
+					end
+					
+					if not bindType and B.BindText[text] then
+						bindType = B.BindText[text]
+						break
+					end
+				end
+			end
+			tooltip:Hide()
+			return bindType
+		end
+		tooltip:Hide()
 	end
+
+	-- fallback for link-only callers
+	local itemInfo = tooltip:GetHyperlinkInfo(itemLink)
+	if itemInfo then
+		for i = 2, BIND do
+			local lineText = itemInfo.lines[i] and itemInfo.lines[i].leftText
+			if lineText and lineText ~= '' then
+				if B.BindText[lineText] then
+					bindType = B.BindText[lineText]
+					break
+				end
+			else
+				break
+			end
+		end
+	end
+
+	return bindType
 end
 
 function B:GetItemQuestInfo(itemLink, itemType, itemSubType)
@@ -545,6 +593,7 @@ function B:UpdateSlot(frame, bagID, slotID)
 	local info = B:GetContainerItemInfo(bagID, slotID)
 
 	slot.name, slot.spellID, slot.itemID, slot.rarity, slot.locked, slot.readable, slot.itemLink = nil, nil, info.itemID, info.quality, info.isLocked, info.isReadable, info.hyperlink
+	slot.stackCount, slot.iconFileID = info.stackCount, info.iconFileID 	-- UpdateBagSlots compares against these later to decide if this slot needs redrawing at all.
 	slot.isJunk = (slot.rarity and slot.rarity == 0) and not info.hasNoValue
 	slot.isEquipment, slot.junkDesaturate = nil, slot.isJunk and B.db.junkDesaturate
 	slot.hasItem = (info.iconFileID and 1) or nil -- used for ShowInspectCursor
@@ -564,7 +613,8 @@ function B:UpdateSlot(frame, bagID, slotID)
 	local isQuestItem, questId, isActiveQuest
 	if slot.itemLink then
 		local _, spellID = GetItemSpell(slot.itemLink)
-		local bindType = B:GetBindTypeText(slot.itemLink)
+		-- Pass bag slot so we can detect already bound BoE-BoU without a second full scan later
+		local bindType = B:GetBindTypeText(slot.itemLink, bagID, slotID)
 		local name, _, _, iLvL, _, itemType, itemSubType, _, itemEquipLoc = GetItemInfo(slot.itemLink)
 		slot.name, slot.spellID, slot.isEquipment, slot.itemEquipLoc, slot.itemType, slot.itemSubType, slot.iLvL = name, spellID, B.IsEquipmentSlot[itemEquipLoc], itemEquipLoc, itemType, itemSubType, iLvL
 
@@ -572,7 +622,9 @@ function B:UpdateSlot(frame, bagID, slotID)
 		isQuestItem, questId, isActiveQuest = questInfo.isQuestItem, questInfo.questID, questInfo.isActive
 
 		local bindTo = (bindType ~= L["BoP"] and B.db.showBindType) and bindType
-		if bindTo then slot.bindType:SetText(bindTo) end
+		if bindTo then
+			slot.bindType:SetText(bindTo)
+		end
 	end
 
 	if slot.Cooldown then
@@ -615,10 +667,19 @@ function B:UpdateBagButtons()
 	B.BagFrame.bagsButton:GetNormalTexture():SetDesaturated(playerCombat)
 end
 
-function B:UpdateBagSlots(frame, bagID)
+function B:UpdateBagSlots(frame, bagID, force)
+	local bag = frame.Bags[bagID]
+	if not bag then return end
+
 	local slotMax = B:GetContainerNumSlots(bagID)
 	for slotID = 1, slotMax do
-		B:UpdateSlot(frame, bagID, slotID)
+		local slot = bag[slotID]
+		if slot then
+			local iconFileID, stackCount, isLocked, _, _, _, hyperlink = GetContainerItemInfo(bagID, slotID)
+			if force or slot.itemLink ~= hyperlink or slot.stackCount ~= stackCount or slot.locked ~= isLocked or slot.iconFileID ~= iconFileID then
+				B:UpdateSlot(frame, bagID, slotID)
+			end
+		end
 	end
 end
 
@@ -2160,7 +2221,6 @@ function B:OpenBank()
 
 	if B.BankFrame.firstOpen then
 		B:UpdateAllSlots(B.BankFrame, true)
-
 		B.BankFrame.firstOpen = nil
 	elseif next(B.BankFrame.staleBags) then
 		for bagID, bag in next, B.BankFrame.staleBags do
@@ -2172,9 +2232,13 @@ function B:OpenBank()
 			else
 				B:UpdateBagSlots(B.BankFrame, bagID)
 			end
-
 			B.BankFrame.staleBags[bagID] = nil
 		end
+	end
+
+	-- Always run the cheap dirty check on open so BoE/BoU text
+	for _, bagID in next, B.BankFrame.BagIDs do
+		B:UpdateBagSlots(B.BankFrame, bagID)
 	end
 
 	if B.db.autoToggle.bank then
@@ -2626,6 +2690,32 @@ function B:Initialize()
 	B:SecureHook('ToggleAllBags')
 	B:SecureHook('CloseAllBags')
 	B:SecureHook('OpenAllBags')
+
+	local lastUsedBagID, lastUsedSlotID
+	hooksecurefunc('UseContainerItem', function(bagID, slotID)
+		lastUsedBagID, lastUsedSlotID = bagID, slotID
+	end)
+	hooksecurefunc('UseInventoryItem', function()
+		lastUsedBagID, lastUsedSlotID = nil, nil
+	end)
+
+	local function RefreshLastUsedSlot()
+		if lastUsedBagID and lastUsedSlotID then
+			local bID, sID = lastUsedBagID, lastUsedSlotID
+			for _, f in pairs(B.BagFrames) do
+				if f.Bags and f.Bags[bID] and f.Bags[bID][sID] then
+
+					E:Delay(0.1, B.UpdateSlot, B, f, bID, sID)
+					E:Delay(0.4, B.UpdateSlot, B, f, bID, sID)
+					break
+				end
+			end
+			lastUsedBagID, lastUsedSlotID = nil, nil
+		end
+	end
+
+	hooksecurefunc('ConfirmBindOnUse', RefreshLastUsedSlot)
+	hooksecurefunc('EquipPendingItem', RefreshLastUsedSlot)
 
 	B:SetupAutoToggle()
 	B:DisableBlizzard()
