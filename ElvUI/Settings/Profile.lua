@@ -1002,6 +1002,7 @@ P.auras = {
 	barColorGradient = false,
 	barNoDuration = true,
 	buffs = {
+		consolidate = false,
 		growthDirection = "LEFT_DOWN",
 		wrapAfter = 12,
 		maxWraps = 3,

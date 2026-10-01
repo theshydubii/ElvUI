@@ -108,6 +108,15 @@ local function GetAuraOptions(headerName)
 		}
 	}
 
+	if headerName == L["Buffs"] then
+		auraOptions.consolidate = {
+			order = 1.5,
+			type = "toggle",
+			name = L["Consolidate Buffs"],
+			desc = L["Group consolidatable buffs into a single icon in the player buff display."]
+		}
+	end
+
 	return auraOptions
 end
 

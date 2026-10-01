@@ -31,7 +31,7 @@ function UF:Construct_BossFrames(frame)
 	frame.Debuffs = self:Construct_Debuffs(frame)
 	frame.DebuffHighlight = self:Construct_DebuffHighlight(frame)
 
-	frame.Castbar = self:Construct_Castbar(frame)
+	frame.Castbar = self:Construct_Castbar(frame, L["Boss Frames"].." "..L["Castbar"], "boss")
 	frame.RaidTargetIndicator = self:Construct_RaidIcon(frame)
 	frame.Fader = self:Construct_Fader()
 	frame.Cutaway = self:Construct_Cutaway(frame)

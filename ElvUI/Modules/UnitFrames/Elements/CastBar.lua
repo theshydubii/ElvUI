@@ -29,7 +29,7 @@ local INVERT_ANCHORPOINT = {
 
 local ticks = {}
 
-function UF:Construct_Castbar(frame, moverName)
+function UF:Construct_Castbar(frame, moverName, moverConfig)
 	local castbar = CreateFrame("StatusBar", nil, frame)
 	castbar:SetFrameLevel(frame.RaisedElementParent:GetFrameLevel() + 30) --Make it appear above everything else
 	self.statusbars[castbar] = true
@@ -82,9 +82,9 @@ function UF:Construct_Castbar(frame, moverName)
 	button:Point("RIGHT", castbar, "LEFT", -E.Spacing*3, 0)
 
 	if moverName then
-		local name = frame:GetName()
-		local configName = string.lower(string.gsub(name, "^ElvUF_", ""))
-		E:CreateMover(castbar.Holder, name.."CastbarMover", moverName, nil, -6, nil, "ALL,SOLO", nil, "unitframe,"..configName..",castbar")
+		local frameName = frame:GetName()
+		local configName = moverConfig or string.lower(string.gsub(frameName, "^ElvUF_", ""))
+		E:CreateMover(castbar.Holder, frameName.."CastbarMover", moverName, nil, -6, nil, "ALL,SOLO", nil, "unitframe,"..configName..",castbar")
 	end
 
 	local icon = button:CreateTexture(nil, "ARTWORK")

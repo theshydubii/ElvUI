@@ -104,6 +104,18 @@ end
 local UpdateTooltip = function(self)
 	if self.IsWeapon then
 		GameTooltip:SetInventoryItem("player", enchantableSlots[self:GetID()])
+	elseif self.consolidatedAuras then
+		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT", -5, -5)
+		GameTooltip:ClearLines()
+		GameTooltip:AddLine(L["Consolidated Buffs"])
+		for _, aura in ipairs(self.consolidatedAuras) do
+			local name = aura.name
+			if aura.count > 1 then
+				name = name .. " (" .. aura.count .. ")"
+			end
+			GameTooltip:AddLine(name)
+		end
+		GameTooltip:Show()
 	else
 		GameTooltip:SetUnitAura("player", self:GetID(), self:GetParent().filter)
 	end
@@ -291,6 +303,7 @@ function A:ConfigureAuras(header, auraTable, weaponPosition)
 		end
 		local buffInfo = auraTable[i]
 		button:SetID(buffInfo.index)
+		button.consolidatedAuras = buffInfo.consolidatedAuras
 
 		if buffInfo.duration > 0 and buffInfo.expires then
 			A:SetAuraTime(button, buffInfo.expires - GetTime(), buffInfo.duration)
@@ -552,19 +565,46 @@ function A:UpdateHeader(header)
 	end
 
 	local i = 1
+	local consolidatedAuras = {}
+	local consolidatedExpiration
+	local consolidatedCaster
 	repeat
 		local aura, _ = freshTable()
-		aura.name, _, aura.icon, aura.count, aura.dispelType, aura.duration, aura.expires, aura.caster = UnitAura("player", i, filter)
-		if aura.name then
+		aura.name, _, aura.icon, aura.count, aura.dispelType, aura.duration, aura.expires, aura.caster, _, aura.shouldConsolidate = UnitAura("player", i, filter)
+		local auraName = aura.name
+		if auraName then
 			aura.filter = filter
 			aura.index = i
 
-			tinsert(sortingTable, aura)
+			if filter == "HELPFUL" and db.consolidate and aura.shouldConsolidate then
+				tinsert(consolidatedAuras, { name = aura.name, count = aura.count, icon = aura.icon, index = i })
+				if aura.expires and (not consolidatedExpiration or aura.expires > consolidatedExpiration) then
+					consolidatedExpiration = aura.expires
+				end
+				if aura.caster == "player" then consolidatedCaster = true end
+				releaseTable(aura)
+			else
+				tinsert(sortingTable, aura)
+			end
 		else
 			releaseTable(aura)
 		end
 		i = i + 1
-	until not aura.name
+	until not auraName
+
+	if #consolidatedAuras > 0 then
+		local aura = freshTable()
+		aura.name = L["Consolidated Buffs"]
+		aura.icon = consolidatedAuras[1].icon
+		aura.count = #consolidatedAuras > 1 and #consolidatedAuras or consolidatedAuras[1].count
+		aura.duration = 0
+		aura.expires = consolidatedExpiration or 0
+		aura.caster = consolidatedCaster and "player" or nil
+		aura.filter = filter
+		aura.index = consolidatedAuras[1].index
+		aura.consolidatedAuras = consolidatedAuras
+		tinsert(sortingTable, aura)
+	end
 
 	local sortMethod = (sorters[db.sortMethod] or sorters.INDEX)[db.sortDir == "-"][db.seperateOwn]
 	tsort(sortingTable, sortMethod)
