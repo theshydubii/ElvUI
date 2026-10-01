@@ -1942,6 +1942,13 @@ local function GetOptionsTable_HealPrediction(updateFunc, groupName, numGroup)
 end
 
 local function CreateCustomTextGroup(unit, objectName)
+	local customTexts = E.db.unitframe.units[unit].customTexts
+	local objectDB = customTexts and customTexts[objectName]
+	if objectDB then
+		if objectDB.useLegacyAnchor == nil then objectDB.useLegacyAnchor = false end
+		objectDB.anchorPoint = objectDB.anchorPoint or objectDB.justifyH or "CENTER"
+	end
+
 	if not E.Options.args.unitframe.args[unit] then
 		return
 	elseif E.Options.args.unitframe.args[unit].args.customText.args[objectName] then
@@ -2050,20 +2057,33 @@ local function CreateCustomTextGroup(unit, objectName)
 					["RIGHT"] = L["Right"]
 				}
 			},
-			xOffset = {
+			useLegacyAnchor = {
 				order = 8,
+				type = "toggle",
+				name = L["Use Legacy Anchor Style"],
+				desc = L["Use the existing Custom Text anchor behavior instead of the selected anchor point."]
+			},
+			anchorPoint = {
+				order = 9,
+				type = "select",
+				name = L["Anchor Point"],
+				values = positionValues,
+				disabled = function() return E.db.unitframe.units[unit].customTexts[objectName].useLegacyAnchor end
+			},
+			xOffset = {
+				order = 10,
 				type = "range",
 				name = L["X-Offset"],
 				min = -400, max = 400, step = 1
 			},
 			yOffset = {
-				order = 9,
+				order = 11,
 				type = "range",
 				name = L["Y-Offset"],
 				min = -400, max = 400, step = 1
 			},
 			attachTextTo = {
-				order = 10,
+				order = 12,
 				type = "select",
 				name = L["Attach Text To"],
 				values = attachToValues
@@ -2124,7 +2144,9 @@ local function GetOptionsTable_CustomText(updateFunc, groupName, numUnits)
 						["yOffset"] = 0,
 						["justifyH"] = "CENTER",
 						["fontOutline"] = E.db.unitframe.fontOutline,
-						["attachTextTo"] = "Health"
+						["attachTextTo"] = "Health",
+						["useLegacyAnchor"] = false,
+						["anchorPoint"] = "CENTER"
 					}
 
 					CreateCustomTextGroup(groupName, textName)

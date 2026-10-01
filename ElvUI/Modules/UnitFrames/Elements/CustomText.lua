@@ -24,6 +24,10 @@ function UF:Configure_CustomTexts(frame)
 			end
 
 			local objectDB = db.customTexts[objectName]
+			if objectDB.useLegacyAnchor == nil then
+				objectDB.useLegacyAnchor = false
+			end
+			objectDB.anchorPoint = objectDB.anchorPoint or objectDB.justifyH or "CENTER"
 
 			if objectDB.font then
 				customFont = UF.LSM:Fetch("font", objectDB.font)
@@ -33,7 +37,8 @@ function UF:Configure_CustomTexts(frame)
 			frame.customTexts[objectName]:FontTemplate(customFont, objectDB.size or UF.db.fontSize, objectDB.fontOutline or UF.db.fontOutline)
 			frame.customTexts[objectName]:SetJustifyH(objectDB.justifyH or "CENTER")
 			frame.customTexts[objectName]:ClearAllPoints()
-			frame.customTexts[objectName]:Point(objectDB.justifyH or "CENTER", attachPoint, objectDB.justifyH or "CENTER", objectDB.xOffset, objectDB.yOffset)
+			local anchorPoint = objectDB.useLegacyAnchor and (objectDB.justifyH or "CENTER") or objectDB.anchorPoint
+			frame.customTexts[objectName]:Point(anchorPoint, attachPoint, anchorPoint, objectDB.xOffset, objectDB.yOffset)
 
 			--This takes care of custom texts that were added before the enable option was added.
 			if objectDB.enable == nil then
