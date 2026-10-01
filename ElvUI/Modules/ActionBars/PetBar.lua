@@ -21,7 +21,6 @@ local PetActionBar_UpdateCooldowns = PetActionBar_UpdateCooldowns
 local NUM_PET_ACTION_SLOTS = NUM_PET_ACTION_SLOTS
 
 local bar = CreateFrame("Frame", "ElvUI_BarPet", E.UIParent, "SecureHandlerStateTemplate")
-bar.borderCategory = "actionbars"
 bar:SetFrameStrata("LOW")
 
 function AB:UpdatePet(event, unit)

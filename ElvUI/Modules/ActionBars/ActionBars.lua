@@ -246,7 +246,6 @@ end
 
 function AB:CreateBar(id)
 	local bar = CreateFrame("Frame", "ElvUI_Bar"..id, E.UIParent, "SecureHandlerStateTemplate")
-	bar.borderCategory = "actionbars"
 	local point, anchor, attachTo, x, y = split(",", self.barDefaults["bar"..id].position)
 	bar:Point(point, anchor, attachTo, x, y)
 	bar.id = id
@@ -349,7 +348,6 @@ end
 
 function AB:CreateVehicleLeave()
 	local vehicle = CreateFrame("Button", "ElvUI_LeaveVehicleButton", E.UIParent)
-	vehicle.borderCategory = "actionbars"
 	vehicle:Hide()
 	vehicle:SetFrameStrata("HIGH")
 	vehicle:SetNormalTexture(E.Media.Textures.ExitVehicle)

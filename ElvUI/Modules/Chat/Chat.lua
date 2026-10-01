@@ -358,7 +358,6 @@ function CH:StyleChat(frame)
 	_G[format("%sEditBoxFocusMid", name)]:Kill()
 	_G[format("%sEditBoxFocusRight", name)]:Kill()
 
-	editbox.borderCategory = "chat"
 	editbox:SetTemplate(nil, true)
 	editbox:SetAltArrowKeyMode(CH.db.useAltKey)
 	editbox:SetAllPoints(LeftChatDataPanel)
@@ -390,7 +389,6 @@ function CH:StyleChat(frame)
 
 	language:Height(22)
 	language:StripTextures()
-	language.borderCategory = "chat"
 	language:SetTemplate("Transparent")
 	language:Point("LEFT", editbox, "RIGHT", -32, 0)
 
@@ -1799,7 +1797,6 @@ end
 
 function CH:BuildCopyChatFrame()
 	local frame = CreateFrame("Frame", "CopyChatFrame", E.UIParent)
-	frame.borderCategory = "chat"
 	frame:Hide()
 	frame:SetTemplate("Transparent")
 	frame:Size(700, 200)

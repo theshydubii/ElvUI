@@ -7,8 +7,6 @@ local unpack, type, select, getmetatable = unpack, type, select, getmetatable
 --WoW API / Variables
 local CreateFrame = CreateFrame
 
-E.borderFrames = E.borderFrames or setmetatable({}, {__mode = "k"})
-
 local backdropr, backdropg, backdropb, backdropa, borderr, borderg, borderb = 0, 0, 0, 1, 0, 0, 0
 local function GetTemplate(template, isUnitFrameElement)
 	backdropa = 1
@@ -36,48 +34,6 @@ end
 
 local function Height(frame, height)
 	frame:SetHeight(E:Scale(height))
-end
-
-local function GetBorderCategory(frame, isUnitFrameElement)
-	if isUnitFrameElement then return "unitframes" end
-
-	while frame do
-		if frame.unitframeType then
-			return "unitframes"
-		elseif frame.borderCategory then
-			return frame.borderCategory
-		end
-		frame = frame:GetParent()
-	end
-
-	return "other"
-end
-
-local function HideBorder(frame)
-	local visibility = E.db.general.borderVisibility
-	return visibility and (visibility.hideAll or visibility[frame._borderCategory])
-end
-
-function E:UpdateBorderVisibility()
-	for frame in pairs(self.borderFrames) do
-		if frame and frame.GetBackdrop then
-			local backdrop = frame:GetBackdrop()
-			if backdrop then
-				local hideBorder = HideBorder(frame)
-				backdrop.edgeSize = hideBorder and 0 or E.mult
-				frame:SetBackdrop(backdrop)
-
-				if frame.iborder then
-					if hideBorder then frame.iborder:Hide() else frame.iborder:Show() end
-				end
-				if frame.oborder then
-					if hideBorder then frame.oborder:Hide() else frame.oborder:Show() end
-				end
-			end
-		else
-			self.borderFrames[frame] = nil
-		end
-	end
 end
 
 local function Point(obj, arg1, arg2, arg3, arg4, arg5)
@@ -123,8 +79,6 @@ end
 
 local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelMode, isUnitFrameElement)
 	GetTemplate(template, isUnitFrameElement)
-	frame._borderCategory = GetBorderCategory(frame, isUnitFrameElement)
-	local hideBorder = HideBorder(frame)
 
 	frame.template = template or "Default"
 	if glossTex then frame.glossTex = glossTex end
@@ -138,7 +92,7 @@ local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelM
 		frame:SetBackdrop({
 			bgFile = bgFile,
 			edgeFile = E.media.blankTex,
-			tile = false, tileSize = 0, edgeSize = hideBorder and 0 or E.mult,
+			tile = false, tileSize = 0, edgeSize = E.mult,
 			insets = {left = 0, right = 0, top = 0, bottom = 0}
 		})
 
@@ -156,7 +110,6 @@ local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelM
 				border:SetBackdropBorderColor(0, 0, 0, 1)
 				frame.iborder = border
 			end
-			if hideBorder then frame.iborder:Hide() else frame.iborder:Show() end
 
 			if not frame.oborder then
 				local border = CreateFrame("Frame", nil, frame)
@@ -170,13 +123,11 @@ local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelM
 				border:SetBackdropBorderColor(0, 0, 0, 1)
 				frame.oborder = border
 			end
-			if hideBorder then frame.oborder:Hide() else frame.oborder:Show() end
 		end
 	else
 		frame:SetBackdrop(nil)
 	end
 	frame:SetBackdropBorderColor(borderr, borderg, borderb)
-	E.borderFrames[frame] = true
 
 	if not frame.ignoreUpdates then
 		if frame.isUnitFrameElement then

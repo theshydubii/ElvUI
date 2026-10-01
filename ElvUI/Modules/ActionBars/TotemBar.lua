@@ -13,7 +13,6 @@ local RegisterStateDriver = RegisterStateDriver
 if E.myclass ~= "SHAMAN" then return end
 
 local bar = CreateFrame("Frame", "ElvUI_BarTotem", E.UIParent, "SecureHandlerStateTemplate")
-bar.borderCategory = "actionbars"
 bar:SetFrameStrata("LOW")
 
 local SLOT_BORDER_COLORS = {
@@ -72,7 +71,6 @@ function AB:StyleTotemSlotButton(button, slot)
 end
 
 function AB:SkinSummonButton(button)
-	button.borderCategory = "actionbars"
 	local name = button:GetName()
 	local icon = _G[name.."Icon"]
 	local highlight = _G[name.."Highlight"]
@@ -97,7 +95,6 @@ function AB:MultiCastFlyoutFrame_ToggleFlyout(frame, type, parent)
 	local numButtons = 0
 	for i, button in ipairs(frame.buttons) do
 		if not button.isSkinned then
-			button.borderCategory = "actionbars"
 			button:SetTemplate("Default")
 			button:StyleButton()
 
@@ -282,7 +279,6 @@ function AB:CreateTotemBar()
 	self:HookScript(MultiCastFlyoutFrame, "OnLeave", "TotemOnLeave")
 
 	local closeButton = MultiCastFlyoutFrameCloseButton
-	closeButton.borderCategory = "actionbars"
 	closeButton:CreateBackdrop("Default", true, true)
 	closeButton.backdrop:SetPoint("TOPLEFT", 0, -(E.Border + E.Spacing))
 	closeButton.backdrop:SetPoint("BOTTOMRIGHT", 0, E.Border + E.Spacing)
@@ -297,7 +293,6 @@ function AB:CreateTotemBar()
 	bar.buttons[closeButton] = true
 
 	local openButton = MultiCastFlyoutFrameOpenButton
-	openButton.borderCategory = "actionbars"
 	openButton:CreateBackdrop("Default", true, true)
 	openButton.backdrop:SetPoint("TOPLEFT", 0, -(E.Border + E.Spacing))
 	openButton.backdrop:SetPoint("BOTTOMRIGHT", 0, E.Border + E.Spacing)
@@ -328,7 +323,6 @@ function AB:CreateTotemBar()
 	for i = 1, 4 do
 		local button = _G["MultiCastSlotButton"..i]
 
-		button.borderCategory = "actionbars"
 		button:StyleButton()
 		button:SetTemplate("Default")
 

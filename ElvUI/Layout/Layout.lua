@@ -281,7 +281,6 @@ function LO:CreateChatPanels()
 
 	--Left Chat
 	local lchat = CreateFrame("Frame", "LeftChatPanel", E.UIParent)
-	lchat.borderCategory = "chat"
 	lchat:SetFrameStrata("BACKGROUND")
 	lchat:SetFrameLevel(100)
 	lchat:Size(E.db.chat.panelWidth, E.db.chat.panelHeight)
@@ -317,7 +316,6 @@ function LO:CreateChatPanels()
 
 	--Left Chat Toggle Button
 	local lchattb = CreateFrame("Button", "LeftChatToggleButton", E.UIParent)
-	lchattb.borderCategory = "chat"
 	lchattb.parent = lchat
 	LeftChatPanel.fadeFunc = ChatPanelLeft_OnFade
 	lchattb:Point("TOPRIGHT", lchatdp, "TOPLEFT", E.Border - E.Spacing*3, 0)
@@ -337,7 +335,6 @@ function LO:CreateChatPanels()
 
 	--Right Chat
 	local rchat = CreateFrame("Frame", "RightChatPanel", E.UIParent)
-	rchat.borderCategory = "chat"
 	rchat:SetFrameStrata("BACKGROUND")
 	rchat:SetFrameLevel(100)
 	rchat:Size(E.db.chat.separateSizes and E.db.chat.panelWidthRight or E.db.chat.panelWidth, E.db.chat.separateSizes and E.db.chat.panelHeightRight or E.db.chat.panelHeight)
@@ -372,7 +369,6 @@ function LO:CreateChatPanels()
 
 	--Right Chat Toggle Button
 	local rchattb = CreateFrame("Button", "RightChatToggleButton", E.UIParent)
-	rchattb.borderCategory = "chat"
 	rchattb.parent = rchat
 	rchat.fadeFunc = ChatPanelRight_OnFade
 	rchattb:Point("TOPLEFT", rchatdp, "TOPRIGHT", -E.Border + E.Spacing*3, 0)

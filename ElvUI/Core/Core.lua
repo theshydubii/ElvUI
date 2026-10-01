@@ -392,7 +392,6 @@ function E:UpdateFrameTemplates()
 			self.unitFrameElements[frame] = nil
 		end
 	end
-
 end
 
 function E:UpdateBorderColors()
@@ -419,8 +418,6 @@ function E:UpdateBorderColors()
 			self.unitFrameElements[frame] = nil
 		end
 	end
-
-	self:UpdateBorderVisibility()
 end
 
 function E:UpdateBackdropColors()
