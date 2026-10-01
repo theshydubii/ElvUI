@@ -385,6 +385,45 @@ E.Options.args.general = {
 							end
 						}
 					}
+				},
+				borderVisibility = {
+					order = 5,
+					type = "group",
+					name = L["Border Visibility"],
+					guiInline = true,
+					get = function(info) return E.db.general.borderVisibility[info[#info]] end,
+					set = function(info, value)
+						E.db.general.borderVisibility[info[#info]] = value
+						E:UpdateBorderColors()
+					end,
+					args = {
+						hideAll = {
+							order = 1,
+							type = "toggle",
+							name = L["Hide All Borders"]
+						},
+						chat = {
+							order = 2,
+							type = "toggle",
+							name = L["Hide Chat Borders"]
+						},
+						actionbars = {
+							order = 3,
+							type = "toggle",
+							name = L["Hide ActionBar Borders"]
+						},
+						unitframes = {
+							order = 4,
+							type = "toggle",
+							name = L["Hide UnitFrame Borders"]
+						},
+						other = {
+							order = 5,
+							type = "toggle",
+							name = L["Hide Other Borders"],
+							desc = L["Hide borders on frames not covered by the other categories."]
+						}
+					}
 				}
 			}
 		},

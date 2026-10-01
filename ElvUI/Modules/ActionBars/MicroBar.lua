@@ -49,6 +49,7 @@ function AB:HandleMicroButton(button)
 	local disabled = button:GetDisabledTexture()
 
 	local f = CreateFrame("Frame", nil, button)
+	f.borderCategory = "actionbars"
 	f:SetFrameLevel(button:GetFrameLevel() - 1)
 	f:SetTemplate("Default", true)
 	f:SetOutside(button)
@@ -149,6 +150,7 @@ end
 
 function AB:SetupMicroBar()
 	local microBar = CreateFrame("Frame", "ElvUI_MicroBar", E.UIParent)
+	microBar.borderCategory = "actionbars"
 	microBar:Point("TOPLEFT", E.UIParent, "TOPLEFT", 4, -48)
 	microBar:SetFrameStrata("LOW")
 	microBar:EnableMouse(true)

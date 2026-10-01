@@ -26,6 +26,7 @@ local CHARACTER_SPECIFIC_KEYBINDING_TOOLTIP = CHARACTER_SPECIFIC_KEYBINDING_TOOL
 local CHARACTER_SPECIFIC_KEYBINDINGS = CHARACTER_SPECIFIC_KEYBINDINGS
 
 local bind = CreateFrame("Frame", "ElvUI_KeyBinder", E.UIParent)
+bind.borderCategory = "actionbars"
 
 function AB:ActivateBindMode()
 	if InCombatLockdown() then
@@ -309,6 +310,7 @@ function AB:LoadKeyBinder()
 
 	--Special Popup
 	local f = CreateFrame("Frame", "ElvUIBindPopupWindow", UIParent)
+	f.borderCategory = "actionbars"
 	f:SetFrameStrata("DIALOG")
 	f:SetToplevel(true)
 	f:EnableMouse(true)
