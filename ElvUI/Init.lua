@@ -44,6 +44,7 @@ local gameSettingsScaleOptions = {
 	{frame = "AchievementFrame", key = "achievements", name = "Achievements", group = "characters"},
 	{frame = "CharacterFrame", key = "characterInfo", name = "Character Info", group = "characters"},
 	{frame = "SpellBookFrame", key = "spellBook", name = "Spell Book", group = "characters"},
+	{frame = "InspectFrame", key = "inspect", name = "Inspect", group = "characters"},
 	{frame = "FriendsFrame", key = "social", name = "Social", group = "characters"},
 	{frame = "PVPFrame", key = "pvp", name = "Player vs. Player", group = "characters"},
 	{frame = "LFDParentFrame", key = "groupFinder", name = "Group Finder", group = "characters"}
