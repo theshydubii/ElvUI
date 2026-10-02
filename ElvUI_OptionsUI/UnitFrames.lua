@@ -279,7 +279,7 @@ local function GetOptionsTable_AuraBars(updateFunc, groupName)
 				order = 21,
 				type = "toggle",
 				name = L["Detach From Frame"],
-				hidden = function() return not UF.AuraBarsMoversIntegrated or (groupName ~= "player" and groupName ~= "target" and groupName ~= "focus" and groupName ~= "pet") end,
+				hidden = function() return groupName ~= "player" and groupName ~= "target" and groupName ~= "focus" and groupName ~= "pet" end,
 				disabled = function() return not E.db.unitframe.units[groupName].aurabar.enable end
 			},
 			detachedWidth = {
@@ -287,7 +287,7 @@ local function GetOptionsTable_AuraBars(updateFunc, groupName)
 				type = "range",
 				name = L["Width"],
 				min = 50, max = 500, step = 1,
-				hidden = function() return not UF.AuraBarsMoversIntegrated or (groupName ~= "player" and groupName ~= "target" and groupName ~= "focus" and groupName ~= "pet") end,
+				hidden = function() return groupName ~= "player" and groupName ~= "target" and groupName ~= "focus" and groupName ~= "pet" end,
 				disabled = function() return not E.db.unitframe.units[groupName].aurabar.enable or not E.db.unitframe.units[groupName].aurabar.detachFromFrame end
 			},
 			detachedSpacing = {
@@ -295,7 +295,7 @@ local function GetOptionsTable_AuraBars(updateFunc, groupName)
 				type = "range",
 				name = L["Vertical Spacing"],
 				min = -10, max = 20, step = 1,
-				hidden = function() return not UF.AuraBarsMoversIntegrated or (groupName ~= "player" and groupName ~= "target" and groupName ~= "focus" and groupName ~= "pet") end,
+				hidden = function() return groupName ~= "player" and groupName ~= "target" and groupName ~= "focus" and groupName ~= "pet" end,
 				disabled = function() return not E.db.unitframe.units[groupName].aurabar.enable or not E.db.unitframe.units[groupName].aurabar.detachFromFrame end
 			},
 			filters = {

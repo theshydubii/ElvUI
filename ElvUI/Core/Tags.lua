@@ -13,11 +13,15 @@ local format = string.format
 local gmatch = gmatch
 local gsub = gsub
 local match = string.match
+local strupper = string.upper
+local len = string.len
+local abs = math.abs
 local utf8lower = string.utf8lower
 local utf8sub = string.utf8sub
 --WoW API / Variables
 local GetGuildInfo = GetGuildInfo
 local GetInstanceInfo = GetInstanceInfo
+local GetNumRaidMembers = GetNumRaidMembers
 local GetNumPartyMembers = GetNumPartyMembers
 local GetPVPTimer = GetPVPTimer
 local GetQuestGreenRange = GetQuestGreenRange
@@ -31,6 +35,7 @@ local UnitExists = UnitExists
 local UnitGUID = UnitGUID
 local UnitHealth = UnitHealth
 local UnitHealthMax = UnitHealthMax
+local UnitFactionGroup = UnitFactionGroup
 local UnitIsAFK = UnitIsAFK
 local UnitIsConnected = UnitIsConnected
 local UnitIsDND = UnitIsDND
@@ -43,6 +48,8 @@ local UnitIsPlayer = UnitIsPlayer
 local UnitIsUnit = UnitIsUnit
 local UnitLevel = UnitLevel
 local UnitName = UnitName
+local IsInGroup = IsInGroup
+local IsInRaid = IsInRaid
 local UnitPVPName = UnitPVPName
 local UnitPower = UnitPower
 local UnitPowerMax = UnitPowerMax
@@ -599,6 +606,236 @@ ElvUF.Tags.Methods["name:title"] = function(unit)
 		return UnitPVPName(unit)
 	end
 end
+
+local function CustomShortValue(number, noDecimal)
+	local shortValueFormat = noDecimal and "%.0f%s" or "%.1f%s"
+	if E.db.general.numberPrefixStyle == "METRIC" then
+		if abs(number) >= 1e9 then
+			return format("%.1f%s", number / 1e9, "G")
+		elseif abs(number) >= 1e6 then
+			return format("%.1f%s", number / 1e6, "M")
+		elseif abs(number) >= 1e3 then
+			return format(shortValueFormat, number / 1e3, "k")
+		end
+	elseif E.db.general.numberPrefixStyle == "CHINESE" then
+		if abs(number) >= 1e8 then
+			return format("%.1f%s", number / 1e8, "Y")
+		elseif abs(number) >= 1e4 then
+			return format("%.1f%s", number / 1e4, "W")
+		end
+	else
+		if abs(number) >= 1e9 then
+			return format("%.1f%s", number / 1e9, "B")
+		elseif abs(number) >= 1e6 then
+			return format("%.1f%s", number / 1e6, "M")
+		elseif abs(number) >= 1e3 then
+			return format(shortValueFormat, number / 1e3, "K")
+		end
+	end
+
+	return format("%d", number)
+end
+
+local function CustomFormattedText(current, maximum, style)
+	if maximum == 0 then maximum = 1 end
+	if style == "PERCENT" then
+		return format("%.0f%%", current / maximum * 100)
+	elseif style == "CURRENT" then
+		return CustomShortValue(current, true)
+	elseif style == "CURRENT_PERCENT" then
+		if current == maximum then
+			return CustomShortValue(current, true)
+		end
+		return format("%s - %.0f%%", CustomShortValue(current, true), current / maximum * 100)
+	end
+end
+
+local function FormatCurrentPercent(current, maximum, compact)
+	if not maximum or maximum <= 0 then return "" end
+	local value = compact and CustomShortValue(current, true) or format("%d", current)
+	return format("%s - %.0f%%", value, current / maximum * 100)
+end
+
+local HEALTH_FORMATS = {
+	{name = "percent", style = "PERCENT"},
+	{name = "current", style = "CURRENT"},
+	{name = "current-percent", style = "CURRENT_PERCENT"}
+}
+local HEALTH_EVENTS = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_CONNECTION"
+
+local function RegisterHealthTag(tag, style, hideFull, hideDead)
+	ElvUF.Tags.Events[tag] = HEALTH_EVENTS
+	ElvUF.Tags.Methods[tag] = function(unit)
+		local current, maximum = UnitHealth(unit), UnitHealthMax(unit)
+		if (hideFull and maximum - current <= 0) or (hideDead and (current == 0 or UnitIsGhost(unit))) then
+			return ""
+		end
+		return CustomFormattedText(current, maximum, style)
+	end
+end
+
+for _, formatInfo in ipairs(HEALTH_FORMATS) do
+	RegisterHealthTag("health:"..formatInfo.name..":hidefull", formatInfo.style, true)
+	RegisterHealthTag("health:"..formatInfo.name..":hidedead", formatInfo.style, false, true)
+	RegisterHealthTag("health:"..formatInfo.name..":hidefull:hidedead", formatInfo.style, true, true)
+end
+
+ElvUF.Tags.Events["health:current-percent:exact"] = HEALTH_EVENTS
+ElvUF.Tags.Methods["health:current-percent:exact"] = function(unit)
+	return FormatCurrentPercent(UnitHealth(unit), UnitHealthMax(unit))
+end
+
+ElvUF.Tags.Events["health:current-percent:compact"] = HEALTH_EVENTS
+ElvUF.Tags.Methods["health:current-percent:compact"] = function(unit)
+	return FormatCurrentPercent(UnitHealth(unit), UnitHealthMax(unit), true)
+end
+
+local POWER_EVENTS = "UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_MAXRUNIC_POWER UNIT_RUNIC_POWER"
+local POWER_STATUS_EVENTS = "UNIT_DISPLAYPOWER UNIT_POWER_FREQUENT UNIT_MAXPOWER UNIT_HEALTH"
+
+local function RegisterPowerTag(tag, style, hideFull, hideZero, hideDead)
+	ElvUF.Tags.Events[tag] = hideDead and POWER_STATUS_EVENTS or POWER_EVENTS
+	ElvUF.Tags.Methods[tag] = function(unit)
+		local powerType = UnitPowerType(unit)
+		local current, maximum = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
+		if (hideFull and maximum - current <= 0)
+			or (hideZero and current <= 0)
+			or (hideDead and (current == 0 or UnitIsGhost(unit) or UnitIsDead(unit))) then
+			return ""
+		end
+		return CustomFormattedText(current, maximum, style)
+	end
+end
+
+local POWER_HIDDEN_STATES = {
+	{name = "hidefull", hideFull = true},
+	{name = "hidezero", hideZero = true},
+	{name = "hidefull:hidezero", hideFull = true, hideZero = true},
+	{name = "hidedead", hideDead = true},
+	{name = "hidefull:hidedead", hideFull = true, hideDead = true}
+}
+
+for _, formatInfo in ipairs(HEALTH_FORMATS) do
+	for _, hiddenState in ipairs(POWER_HIDDEN_STATES) do
+		RegisterPowerTag("power:"..formatInfo.name..":"..hiddenState.name, formatInfo.style, hiddenState.hideFull, hiddenState.hideZero, hiddenState.hideDead)
+	end
+end
+
+ElvUF.Tags.Events["power:current-percent:exact"] = POWER_EVENTS
+ElvUF.Tags.Methods["power:current-percent:exact"] = function(unit)
+	local powerType = UnitPowerType(unit)
+	return FormatCurrentPercent(UnitPower(unit, powerType), UnitPowerMax(unit, powerType))
+end
+
+ElvUF.Tags.Events["power:current-percent:compact"] = POWER_EVENTS
+ElvUF.Tags.Methods["power:current-percent:compact"] = function(unit)
+	local powerType = UnitPowerType(unit)
+	return FormatCurrentPercent(UnitPower(unit, powerType), UnitPowerMax(unit, powerType), true)
+end
+
+ElvUF.Tags.Events["num:targeting"] = "UNIT_TARGET PLAYER_TARGET_CHANGED RAID_ROSTER_UPDATE"
+ElvUF.Tags.Methods["num:targeting"] = function(unit)
+	if not IsInGroup() then return "" end
+	local targetingCount = 0
+	local inRaid = IsInRaid()
+	local memberCount = inRaid and GetNumRaidMembers() or GetNumPartyMembers()
+
+	for index = 1, memberCount do
+		local groupUnit = inRaid and "raid"..index or "party"..index
+		if UnitIsUnit(groupUnit.."target", unit) and not UnitIsUnit(groupUnit, "player") then
+			targetingCount = targetingCount + 1
+		end
+	end
+
+	if UnitIsUnit("target", unit) then
+		targetingCount = targetingCount + 1
+	end
+
+	return targetingCount > 0 and targetingCount or ""
+end
+
+ElvUF.Tags.Events["deficit:name:colors"] = "UNIT_HEALTH UNIT_MAXHEALTH UNIT_NAME_UPDATE"
+ElvUF.Tags.Methods["deficit:name:colors"] = function(unit)
+	local missingHealth = _TAGS["missinghp"](unit)
+	if missingHealth and missingHealth ~= "" then
+		return format("%s-%s|r", _TAGS["healthcolor"](unit), missingHealth)
+	end
+
+	return format("%s%s|r", _TAGS["namecolor"](unit), _TAGS["name"](unit))
+end
+
+ElvUF.Tags.Events["name:caps"] = "UNIT_NAME_UPDATE"
+ElvUF.Tags.Methods["name:caps"] = function(unit)
+	local name = UnitName(unit)
+	return name and strupper(name) or ""
+end
+
+ElvUF.Tags.Events["name:abbreviate"] = "UNIT_NAME_UPDATE"
+ElvUF.Tags.Methods["name:abbreviate"] = function(unit)
+	local name = UnitName(unit)
+	return name and gsub(name, "(%S+) ", function(word) return utf8sub(word, 1, 1)..". " end)
+end
+
+ElvUF.Tags.Events["name:hyphen-abbreviate"] = "UNIT_NAME_UPDATE"
+ElvUF.Tags.Methods["name:hyphen-abbreviate"] = function(unit)
+	local name = UnitName(unit)
+	if not name then return "" end
+
+	return gsub(name, "(%S+)(%s+)", function(word, whitespace)
+		local abbreviation = gsub(word, "([^%-]+)", function(part) return utf8sub(part, 1, 1) end)
+		return abbreviation.."."..whitespace
+	end)
+end
+
+local ABBREVIATED_NAME_LENGTHS = {veryshort = 5, short = 10, medium = 15, long = 20}
+local function RegisterAbbreviatedNameTag(lengthName, maxLength)
+	local tag = "name:"..lengthName..":abbreviate"
+	ElvUF.Tags.Events[tag] = "UNIT_NAME_UPDATE"
+	ElvUF.Tags.Methods[tag] = function(unit)
+		local name = UnitName(unit)
+		if name and len(name) > maxLength then
+			name = gsub(name, "(%S+) ", function(word) return utf8sub(word, 1, 1)..". " end)
+		end
+		return name
+	end
+end
+
+for lengthName, maxLength in pairs(ABBREVIATED_NAME_LENGTHS) do
+	RegisterAbbreviatedNameTag(lengthName, maxLength)
+end
+
+ElvUF.Tags.Events["faction:icon"] = "UNIT_NAME_UPDATE"
+ElvUF.Tags.Methods["faction:icon"] = function(unit)
+	local faction = UnitFactionGroup(unit)
+	if faction == "Alliance" then
+		return "|TInterface\\AddOns\\ElvUI\\Media\\Textures\\Alliance.blp:0:0:0:-1|t"
+	elseif faction == "Horde" then
+		return "|TInterface\\AddOns\\ElvUI\\Media\\Textures\\Horde.blp:0:0:0:-1|t"
+	end
+	return ""
+end
+
+local function GetClassColor(classToken)
+	local color = ElvUF.colors.class[classToken]
+	return color and Hex(color[1], color[2], color[3]) or "|cFFC2C2C2"
+end
+
+ElvUF.Tags.Methods["classcolor:player"] = function()
+	local _, classToken = UnitClass("player")
+	return GetClassColor(classToken)
+end
+
+local function RegisterClassColorTag(classToken)
+	local tag = "classcolor:"..strlower(classToken)
+	ElvUF.Tags.Methods[tag] = function()
+		return GetClassColor(classToken)
+	end
+end
+
+for _, classToken in ipairs({"HUNTER", "WARRIOR", "PALADIN", "MAGE", "PRIEST", "WARLOCK", "SHAMAN", "DEATHKNIGHT", "DRUID", "ROGUE"}) do
+	RegisterClassColorTag(classToken)
+end
+
 E.TagInfo = {
 	--Colors
 	["namecolor"] = {category = "Colors", description = "Colors names by player class or NPC reaction"},
@@ -727,6 +964,126 @@ E.TagInfo = {
 	["plus"] = {category = "Miscellaneous", description = "Displays the character '+' if the unit is an elite or rare-elite"},
 	["arena:number"] = {category = "Miscellaneous", description = "Displays the arena number 1-5"},
 }
+
+local HEALTH_TAG_DESCRIPTIONS = {
+	percent = "Shows the unit's health as a whole-number percentage",
+	current = "Shows the unit's current health as a whole number",
+	["current-percent"] = "Shows the unit's current health and whole-number percentage"
+}
+
+for _, formatInfo in ipairs(HEALTH_FORMATS) do
+	local description = HEALTH_TAG_DESCRIPTIONS[formatInfo.name]
+	E.TagInfo["health:"..formatInfo.name..":hidefull"] = {
+		category = "Health",
+		description = description.."; hidden at full health"
+	}
+	E.TagInfo["health:"..formatInfo.name..":hidedead"] = {
+		category = "Health",
+		description = description.."; hidden when dead or a ghost"
+	}
+	E.TagInfo["health:"..formatInfo.name..":hidefull:hidedead"] = {
+		category = "Health",
+		description = description.."; hidden at full health, when dead, or as a ghost"
+	}
+end
+
+E.TagInfo["health:current-percent:exact"] = {
+	category = "Health",
+	description = "Shows exact current health and whole-number percentage"
+}
+E.TagInfo["health:current-percent:compact"] = {
+	category = "Health",
+	description = "Shows abbreviated current health and whole-number percentage"
+}
+
+local POWER_TAG_DESCRIPTIONS = {
+	percent = "Shows the unit's power as a whole-number percentage",
+	current = "Shows the unit's current power as a whole number",
+	["current-percent"] = "Shows the unit's current power and whole-number percentage"
+}
+local POWER_STATE_DESCRIPTIONS = {
+	hidefull = "hidden at full power",
+	hidezero = "hidden with no power",
+	["hidefull:hidezero"] = "hidden at full power or with no power",
+	hidedead = "hidden with no power, when dead, or as a ghost",
+	["hidefull:hidedead"] = "hidden at full power, with no power, when dead, or as a ghost"
+}
+
+for _, formatInfo in ipairs(HEALTH_FORMATS) do
+	for _, hiddenState in ipairs(POWER_HIDDEN_STATES) do
+		local tag = "power:"..formatInfo.name..":"..hiddenState.name
+		E.TagInfo[tag] = {
+			category = "Power",
+			description = POWER_TAG_DESCRIPTIONS[formatInfo.name].."; "..POWER_STATE_DESCRIPTIONS[hiddenState.name]
+		}
+	end
+end
+
+E.TagInfo["power:current-percent:exact"] = {
+	category = "Power",
+	description = "Shows exact current power and whole-number percentage"
+}
+E.TagInfo["power:current-percent:compact"] = {
+	category = "Power",
+	description = "Shows abbreviated current power and whole-number percentage"
+}
+
+E.TagInfo["num:targeting"] = {
+	category = "Party and Raid",
+	description = "Shows how many group members are targeting this unit"
+}
+E.TagInfo["deficit:name:colors"] = {
+	category = "Health",
+	description = "Shows the missing-health amount, or the colored unit name at full health"
+}
+E.TagInfo["name:caps"] = {
+	category = "Names",
+	description = "Shows the unit name in uppercase"
+}
+E.TagInfo["name:abbreviate"] = {
+	category = "Names",
+	description = "Abbreviates earlier words in the unit name (for example, 'Shadowfury Witch Doctor' becomes 'S. W. Doctor')"
+}
+E.TagInfo["name:hyphen-abbreviate"] = {
+	category = "Names",
+	description = "Abbreviates earlier words and parts of hyphenated words in the unit name"
+}
+
+local NAME_LENGTHS = {veryshort = 5, short = 10, medium = 15, long = 20}
+for lengthName, maxLength in pairs(NAME_LENGTHS) do
+	E.TagInfo["name:"..lengthName..":abbreviate"] = {
+		category = "Names",
+		description = format("Abbreviates earlier words when the unit name exceeds %d characters", maxLength)
+	}
+end
+
+E.TagInfo["faction:icon"] = {
+	category = "Miscellaneous",
+	description = "Shows the unit's Alliance or Horde faction icon"
+}
+E.TagInfo["classcolor:player"] = {
+	category = "Colors",
+	description = "Returns the player's class color"
+}
+
+local CLASS_COLOR_NAMES = {
+	HUNTER = "Hunter",
+	WARRIOR = "Warrior",
+	PALADIN = "Paladin",
+	MAGE = "Mage",
+	PRIEST = "Priest",
+	WARLOCK = "Warlock",
+	SHAMAN = "Shaman",
+	DEATHKNIGHT = "Death Knight",
+	DRUID = "Druid",
+	ROGUE = "Rogue"
+}
+for classToken, className in pairs(CLASS_COLOR_NAMES) do
+	E.TagInfo["classcolor:"..strlower(classToken)] = {
+		category = "Colors",
+		description = "Returns the "..className.." class color"
+	}
+end
 
 function E:AddTagInfo(tagName, category, description, order)
 	if order then order = tonumber(order) + 10 end
