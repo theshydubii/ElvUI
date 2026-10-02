@@ -1,5 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
 	<Script file="DataTexts.lua"/>
+	<Script file="ExtraBars.lua"/>
 	<Script file="System.lua"/>
 	<Script file="Armor.lua"/>
 	<Script file="Avoidance.lua"/>

@@ -33,6 +33,27 @@ G.bags = {
 	ignoredItems = {},
 }
 
+G.dtbars = {}
+G.dtbarsSetup = {
+	advanced = false,
+	name = "",
+	anchor = "CENTER",
+	point = "CENTER",
+	x = 0,
+	y = 0,
+	slots = 3,
+	growth = "HORIZONTAL",
+	width = 300,
+	height = 22,
+	strata = "LOW",
+	transparent = false,
+	hide = false,
+	mouseover = false,
+	combatHide = false,
+	vehicleHide = false,
+	border = true
+}
+
 G.nameplates = {}
 
 G.unitframe = {

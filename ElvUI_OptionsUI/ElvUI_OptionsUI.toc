@@ -16,6 +16,7 @@ Bags.lua
 Chat.lua
 Cooldown.lua
 DataTexts.lua
+DataTexts_ExtraBars.lua
 Filters.lua
 Nameplates.lua
 Skins.lua

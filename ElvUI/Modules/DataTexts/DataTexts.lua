@@ -47,6 +47,23 @@ DT.PointLocation = {
 	[3] = "right"
 }
 
+function DT:ColorFont()
+	local color
+	if E.db.dtc.customColor == 1 then
+		color = E.myclass == "PRIEST" and E.PriestColors or (CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[E.myclass] or RAID_CLASS_COLORS[E.myclass])
+	elseif E.db.dtc.customColor == 2 then
+		color = E.db.dtc.userColor
+	else
+		color = E.db.general.valuecolor
+	end
+
+	for _, panel in pairs(self.RegisteredPanels) do
+		for _, dataPanel in pairs(panel.dataPanels) do
+			dataPanel.text:SetTextColor(color.r, color.g, color.b)
+		end
+	end
+end
+
 function DT:PLAYER_ENTERING_WORLD()
 	local inInstance, instanceType = IsInInstance()
 	self.isInPVP = inInstance and instanceType == "pvp"
@@ -289,6 +306,8 @@ function DT:LoadDataTexts()
 	if DT.ForceHideBGStats then
 		DT.ForceHideBGStats = nil
 	end
+
+	self:ColorFont()
 end
 
 --[[

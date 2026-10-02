@@ -155,6 +155,40 @@ E.Options.args.datatexts = {
 								FREE_TOTAL = L["Free/Total"],
 								USED_TOTAL = L["Used/Total"]
 							}
+						},
+						dtTextColor = {
+							order = 9,
+							type = "group",
+							name = L["Text Color"],
+							guiInline = true,
+							get = function(info) return E.db.dtc[info[#info]] end,
+							set = function(info, value)
+								E.db.dtc[info[#info]] = value
+								DT:ColorFont()
+							end,
+							args = {
+								customColor = {
+									order = 1,
+									type = "select",
+									name = COLOR,
+									values = {[1] = CLASS_COLORS, [2] = CUSTOM, [3] = L["Value Color"]}
+								},
+								userColor = {
+									order = 2,
+									type = "color",
+									name = COLOR_PICKER,
+									disabled = function() return E.db.dtc.customColor ~= 2 end,
+									get = function()
+										local current = E.db.dtc.userColor
+										local default = P.dtc.userColor
+										return current.r, current.g, current.b, current.a, default.r, default.g, default.b
+									end,
+									set = function(_, r, g, b)
+										E.db.dtc.userColor = {r = r, g = g, b = b}
+										DT:ColorFont()
+									end
+								}
+							}
 						}
 					}
 				},

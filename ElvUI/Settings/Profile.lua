@@ -1147,6 +1147,12 @@ P.chat = {
 }
 
 --Datatexts
+P.dtbars = {}
+P.dtc = {
+	customColor = 2,
+	userColor = {r = 1, g = 1, b = 1}
+}
+
 P.datatexts = {
 	font = "PT Sans Narrow",
 	fontSize = 12,
