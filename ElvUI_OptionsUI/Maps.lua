@@ -149,12 +149,22 @@ E.Options.args.maps = {
 							get = function(info) return E.private.general.minimap[info[#info]] end,
 							set = function(info, value) E.private.general.minimap[info[#info]] = value E:StaticPopup_Show("PRIVATE_RL") end
 						},
-						size = {
+						minimapSizeLimits = {
 							order = 2,
+							type = "toggle",
+							name = L["Minimap Size Limits"],
+							get = function() return E.private.CustomTweaks.MinimapSizeLimits end,
+							set = function(_, value)
+								E.private.CustomTweaks.MinimapSizeLimits = value
+								E:StaticPopup_Show("PRIVATE_RL")
+							end
+						},
+						size = {
+							order = 3,
 							type = "range",
 							name = L["Size"],
 							desc = L["Adjust the size of the minimap."],
-							min = 120, max = 250, step = 1,
+							min = E.private.CustomTweaks.MinimapSizeLimits and 40 or 120, max = 250, step = 1,
 							get = function(info) return E.db.general.minimap[info[#info]] end,
 							set = function(info, value) E.db.general.minimap[info[#info]] = value MM:UpdateSettings() end,
 							disabled = function() return not E.private.general.minimap.enable end

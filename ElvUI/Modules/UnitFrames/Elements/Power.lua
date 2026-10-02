@@ -204,7 +204,14 @@ function UF:Configure_Power(frame)
 		frame:Tag(power.value, "")
 	end
 
-	power.custom_backdrop = UF.db.colors.custompowerbackdrop and UF.db.colors.power_backdrop
+		if E.private.CustomTweaks.PowerBarTexture then
+			local texture = E.Libs.LSM:Fetch("statusbar", E.db.CustomTweaks.PowerBarTexture.powerstatusbar)
+			power:SetStatusBarTexture(texture)
+			power.texture = texture
+			self.statusbars[power] = nil
+		end
+
+		power.custom_backdrop = UF.db.colors.custompowerbackdrop and UF.db.colors.power_backdrop
 
 	--Transparency Settings
 	UF:ToggleTransparentStatusBar(UF.db.colors.transparentPower, power, power.BG, nil, UF.db.colors.invertPower)

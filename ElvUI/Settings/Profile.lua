@@ -1182,6 +1182,7 @@ P.datatexts = {
 	---General
 	goldFormat = "BLIZZARD",
 	goldCoins = true,
+	bagsTextFormat = "USED_TOTAL",
 	---Time
 	realmTime = false,
 	timeFormat = "%I:%M",
@@ -1253,6 +1254,41 @@ P.tooltip = {
 }
 
 --UnitFrame
+P.CustomTweaks = {
+	ClickThroughActionBars = {},
+	PushedColor = {Color = {r = 1, g = 0, b = 0, a = 0.3}},
+	BagButtons = {stackButton = false, style = "ICON", buttonColor = {r = 0.3, g = 0.3, b = 0.3}},
+	ChatMaxLines = {MaxLines = 128},
+	BagsTextFormat = {textFormat = "USED_TOTAL"},
+	RaidControl = {hide = false, transparent = true},
+	AuraIconSpacing = {spacing = 1, units = {}},
+	CastbarText = {},
+	PowerBarTexture = {powerstatusbar = "ElvUI Norm"},
+	CastbarFont = {}
+}
+
+for bar = 1, 10 do
+	P.CustomTweaks.ClickThroughActionBars["bar"..bar] = false
+end
+P.CustomTweaks.ClickThroughActionBars.barPet = false
+P.CustomTweaks.ClickThroughActionBars.stanceBar = false
+
+local customTweakUnits = {"Player", "Pet", "Target", "Focus", "Arena", "Boss"}
+for _, unit in ipairs(customTweakUnits) do
+	P.CustomTweaks.CastbarText[unit] = {
+		duration = {point = "RIGHT", xOffset = -4, yOffset = 0, color = {r = 0.84, g = 0.75, b = 0.65, a = 1}},
+		text = {point = "LEFT", xOffset = 4, yOffset = 0, color = {r = 0.84, g = 0.75, b = 0.65, a = 1}}
+	}
+	P.CustomTweaks.CastbarFont[unit] = {
+		duration = {font = "Homespun", fontSize = 10, fontOutline = "MONOCHROMEOUTLINE"},
+		text = {font = "Homespun", fontSize = 10, fontOutline = "MONOCHROMEOUTLINE"}
+	}
+end
+
+for _, unit in ipairs({"player", "target", "targettarget", "targettargettarget", "focus", "focustarget", "pet", "pettarget", "arena", "boss", "party", "raid", "raid40", "raidpet", "tank", "assist"}) do
+	P.CustomTweaks.AuraIconSpacing.units[unit] = true
+end
+
 P.unitframe = {
 	smoothbars = false,
 	statusbar = "ElvUI Norm",

@@ -157,6 +157,8 @@ function AB:PositionAndSizeBarPet()
 	end
 
 	bar.mouseover = self.db.barPet.mouseover
+	local clickThrough = E.private.CustomTweaks.ClickThroughActionBars and E.db.CustomTweaks.ClickThroughActionBars.barPet
+	bar:EnableMouse(not clickThrough)
 	if bar.mouseover then
 		bar:SetAlpha(0)
 	else
@@ -228,6 +230,7 @@ function AB:PositionAndSizeBarPet()
 			button:SetScale(1)
 			button:SetAlpha(bar.db.alpha)
 		end
+		button:EnableMouse(not clickThrough)
 
 		self:StyleButton(button, nil, (self.LBFGroup or self.MSQGroup) and E.private.actionbar.lbf.enable and true or nil)
 	end

@@ -996,6 +996,39 @@ local function GetOptionsTable_Power(hasDetatchOption, updateFunc, groupName, nu
 		}
 	}
 
+	config.args.powerBarTexture = {
+		order = 13,
+		type = "group",
+		name = L["PowerBar Texture"],
+		guiInline = true,
+		hidden = function() return groupName ~= "player" end,
+		args = {
+			enable = {
+				order = 1,
+				type = "toggle",
+				name = L["Enable"],
+				get = function() return E.private.CustomTweaks.PowerBarTexture end,
+				set = function(_, value)
+					E.private.CustomTweaks.PowerBarTexture = value
+					E:StaticPopup_Show("PRIVATE_RL")
+				end
+			},
+			powerstatusbar = {
+				order = 2,
+				type = "select",
+				dialogControl = "LSM30_Statusbar",
+				name = L["PowerBar Texture"],
+				values = AceGUIWidgetLSMlists.statusbar,
+				disabled = function() return not E.private.CustomTweaks.PowerBarTexture end,
+				get = function() return E.db.CustomTweaks.PowerBarTexture.powerstatusbar end,
+				set = function(_, value)
+					E.db.CustomTweaks.PowerBarTexture.powerstatusbar = value
+					UF:Update_AllFrames()
+				end
+			}
+		}
+	}
+
 	if hasDetatchOption then
 		config.args.detachFromFrame = {
 			order = 11,
@@ -1312,6 +1345,10 @@ local function GetOptionsTable_Fader(updateFunc, groupName, numUnits)
 end
 
 local function GetOptionsTable_Castbar(hasTicks, updateFunc, groupName, numUnits)
+	local customCastbarUnits = {
+		player = "Player", pet = "Pet", target = "Target", focus = "Focus", arena = "Arena", boss = "Boss"
+	}
+	local customCastbarUnit = customCastbarUnits[groupName]
 	local config = {
 		order = 700,
 		type = "group",
@@ -1624,6 +1661,224 @@ local function GetOptionsTable_Castbar(hasTicks, updateFunc, groupName, numUnits
 				name = L["Time"] .. " " .. L["Y-Offset"],
 				min = -50, max = 50, step = 1,
 				disabled = function() local db = E.db.unitframe.units[groupName].castbar return not db.enable or not db.overlay or db.overlayHideText end
+			}
+		}
+	}
+
+	config.args.customCastbarText = {
+		order = 16,
+		type = "group",
+		name = L["Text"],
+		guiInline = true,
+		hidden = function() return not customCastbarUnit end,
+		args = {
+			enable = {
+				order = 1,
+				type = "toggle",
+				name = L["Enable"],
+				get = function() return E.private.CustomTweaks.CastbarText end,
+				set = function(_, value)
+					E.private.CustomTweaks.CastbarText = value
+					E:StaticPopup_Show("PRIVATE_RL")
+				end
+			},
+			textColor = {
+				order = 2,
+				type = "color",
+				name = L["Text"] .. " " .. L["Color"],
+				hasAlpha = true,
+				disabled = function() return not E.private.CustomTweaks.CastbarText end,
+				get = function()
+					local current = E.db.CustomTweaks.CastbarText[customCastbarUnit].text.color
+					local default = P.CustomTweaks.CastbarText[customCastbarUnit].text.color
+					return current.r, current.g, current.b, current.a, default.r, default.g, default.b, default.a
+				end,
+				set = function(_, r, g, b, a)
+					E.db.CustomTweaks.CastbarText[customCastbarUnit].text.color = {r = r, g = g, b = b, a = a}
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			textPoint = {
+				order = 3,
+				type = "select",
+				name = L["Text"] .. " " .. L["Anchor Point"],
+				values = positionValues,
+				disabled = function() return not E.private.CustomTweaks.CastbarText end,
+				get = function() return E.db.CustomTweaks.CastbarText[customCastbarUnit].text.point end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarText[customCastbarUnit].text.point = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			textXOffset = {
+				order = 4,
+				type = "range",
+				name = L["Text"] .. " " .. L["X-Offset"],
+				min = -50, max = 50, step = 1,
+				disabled = function() return not E.private.CustomTweaks.CastbarText end,
+				get = function() return E.db.CustomTweaks.CastbarText[customCastbarUnit].text.xOffset end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarText[customCastbarUnit].text.xOffset = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			textYOffset = {
+				order = 5,
+				type = "range",
+				name = L["Text"] .. " " .. L["Y-Offset"],
+				min = -50, max = 50, step = 1,
+				disabled = function() return not E.private.CustomTweaks.CastbarText end,
+				get = function() return E.db.CustomTweaks.CastbarText[customCastbarUnit].text.yOffset end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarText[customCastbarUnit].text.yOffset = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			durationColor = {
+				order = 6,
+				type = "color",
+				name = L["Time"] .. " " .. L["Color"],
+				hasAlpha = true,
+				disabled = function() return not E.private.CustomTweaks.CastbarText end,
+				get = function()
+					local current = E.db.CustomTweaks.CastbarText[customCastbarUnit].duration.color
+					local default = P.CustomTweaks.CastbarText[customCastbarUnit].duration.color
+					return current.r, current.g, current.b, current.a, default.r, default.g, default.b, default.a
+				end,
+				set = function(_, r, g, b, a)
+					E.db.CustomTweaks.CastbarText[customCastbarUnit].duration.color = {r = r, g = g, b = b, a = a}
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			durationPoint = {
+				order = 7,
+				type = "select",
+				name = L["Time"] .. " " .. L["Anchor Point"],
+				values = positionValues,
+				disabled = function() return not E.private.CustomTweaks.CastbarText end,
+				get = function() return E.db.CustomTweaks.CastbarText[customCastbarUnit].duration.point end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarText[customCastbarUnit].duration.point = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			durationXOffset = {
+				order = 8,
+				type = "range",
+				name = L["Time"] .. " " .. L["X-Offset"],
+				min = -50, max = 50, step = 1,
+				disabled = function() return not E.private.CustomTweaks.CastbarText end,
+				get = function() return E.db.CustomTweaks.CastbarText[customCastbarUnit].duration.xOffset end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarText[customCastbarUnit].duration.xOffset = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			durationYOffset = {
+				order = 9,
+				type = "range",
+				name = L["Time"] .. " " .. L["Y-Offset"],
+				min = -50, max = 50, step = 1,
+				disabled = function() return not E.private.CustomTweaks.CastbarText end,
+				get = function() return E.db.CustomTweaks.CastbarText[customCastbarUnit].duration.yOffset end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarText[customCastbarUnit].duration.yOffset = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			}
+		}
+	}
+
+	config.args.customCastbarFont = {
+		order = 17,
+		type = "group",
+		name = L["Fonts"],
+		guiInline = true,
+		hidden = function() return not customCastbarUnit end,
+		args = {
+			enable = {
+				order = 1,
+				type = "toggle",
+				name = L["Enable"],
+				get = function() return E.private.CustomTweaks.CastbarFont end,
+				set = function(_, value)
+					E.private.CustomTweaks.CastbarFont = value
+					E:StaticPopup_Show("PRIVATE_RL")
+				end
+			},
+			textFont = {
+				order = 2,
+				type = "select",
+				dialogControl = "LSM30_Font",
+				name = L["Text"] .. " " .. L["Font"],
+				values = AceGUIWidgetLSMlists.font,
+				disabled = function() return not E.private.CustomTweaks.CastbarFont end,
+				get = function() return E.db.CustomTweaks.CastbarFont[customCastbarUnit].text.font end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarFont[customCastbarUnit].text.font = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			textFontSize = {
+				order = 3,
+				type = "range",
+				name = L["Text"] .. " " .. L["Font Size"],
+				min = 4, max = 22, step = 1,
+				disabled = function() return not E.private.CustomTweaks.CastbarFont end,
+				get = function() return E.db.CustomTweaks.CastbarFont[customCastbarUnit].text.fontSize end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarFont[customCastbarUnit].text.fontSize = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			textFontOutline = {
+				order = 4,
+				type = "select",
+				name = L["Text"] .. " " .. L["Font Outline"],
+				values = {NONE = L["None"], OUTLINE = "OUTLINE", MONOCHROMEOUTLINE = "MONOCHROMEOUTLINE", THICKOUTLINE = "THICKOUTLINE"},
+				disabled = function() return not E.private.CustomTweaks.CastbarFont end,
+				get = function() return E.db.CustomTweaks.CastbarFont[customCastbarUnit].text.fontOutline end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarFont[customCastbarUnit].text.fontOutline = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			durationFont = {
+				order = 5,
+				type = "select",
+				dialogControl = "LSM30_Font",
+				name = L["Time"] .. " " .. L["Font"],
+				values = AceGUIWidgetLSMlists.font,
+				disabled = function() return not E.private.CustomTweaks.CastbarFont end,
+				get = function() return E.db.CustomTweaks.CastbarFont[customCastbarUnit].duration.font end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarFont[customCastbarUnit].duration.font = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			durationFontSize = {
+				order = 6,
+				type = "range",
+				name = L["Time"] .. " " .. L["Font Size"],
+				min = 4, max = 22, step = 1,
+				disabled = function() return not E.private.CustomTweaks.CastbarFont end,
+				get = function() return E.db.CustomTweaks.CastbarFont[customCastbarUnit].duration.fontSize end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarFont[customCastbarUnit].duration.fontSize = value
+					updateFunc(UF, groupName, numUnits)
+				end
+			},
+			durationFontOutline = {
+				order = 7,
+				type = "select",
+				name = L["Time"] .. " " .. L["Font Outline"],
+				values = {NONE = L["None"], OUTLINE = "OUTLINE", MONOCHROMEOUTLINE = "MONOCHROMEOUTLINE", THICKOUTLINE = "THICKOUTLINE"},
+				disabled = function() return not E.private.CustomTweaks.CastbarFont end,
+				get = function() return E.db.CustomTweaks.CastbarFont[customCastbarUnit].duration.fontOutline end,
+				set = function(_, value)
+					E.db.CustomTweaks.CastbarFont[customCastbarUnit].duration.fontOutline = value
+					updateFunc(UF, groupName, numUnits)
+				end
 			}
 		}
 	}
@@ -2693,6 +2948,63 @@ E.Options.args.unitframe = {
 								["ALT"] = L["ALT_KEY_TEXT"],
 								["CTRL"] = L["CTRL_KEY"]
 							}
+						},
+						auraIconSpacing = {
+							order = 7,
+							type = "group",
+							name = L["Aura Spacing"],
+							guiInline = true,
+							args = {
+								enable = {
+									order = 1,
+									type = "toggle",
+									name = L["Enable"],
+									get = function() return E.private.CustomTweaks.AuraIconSpacing end,
+									set = function(_, value)
+										E.private.CustomTweaks.AuraIconSpacing = value
+										E:StaticPopup_Show("PRIVATE_RL")
+									end
+								},
+								spacing = {
+									order = 2,
+									type = "range",
+									name = L["Spacing"],
+									min = 0, max = 10, step = 1,
+									disabled = function() return not E.private.CustomTweaks.AuraIconSpacing end,
+									get = function() return E.db.CustomTweaks.AuraIconSpacing.spacing end,
+									set = function(_, value)
+										E.db.CustomTweaks.AuraIconSpacing.spacing = value
+										UF:Update_AllFrames()
+									end
+								},
+								units = {
+									order = 3,
+									type = "multiselect",
+									name = L["Set Aura Spacing On Following Units"],
+									disabled = function() return not E.private.CustomTweaks.AuraIconSpacing end,
+									values = {
+										player = L["Player"], target = L["Target"], targettarget = L["TargetTarget"], targettargettarget = L["TargetTargetTarget"],
+										focus = L["Focus"], focustarget = L["FocusTarget"], pet = L["Pet"], pettarget = L["PetTarget"],
+										arena = L["Arena"], boss = L["Boss"], party = L["Party"], raid = L["Raid"], raid40 = L["Raid40"], raidpet = L["RaidPet"],
+										tank = L["Tank"], assist = L["Assist"]
+									},
+									get = function(_, key) return E.db.CustomTweaks.AuraIconSpacing.units[key] end,
+									set = function(_, key, value)
+										E.db.CustomTweaks.AuraIconSpacing.units[key] = value
+										UF:Update_AllFrames()
+									end
+								}
+							}
+						},
+						unitFrameSpacingLimits = {
+							order = 8,
+							type = "toggle",
+							name = L["Unit Frame Spacing Limits"],
+							get = function() return E.private.CustomTweaks.UnitFrameSpacingLimits end,
+							set = function(_, value)
+								E.private.CustomTweaks.UnitFrameSpacingLimits = value
+								E:StaticPopup_Show("PRIVATE_RL")
+							end
 						},
 						resetFilters = {
 							order = 6,
@@ -6016,13 +6328,13 @@ E.Options.args.unitframe.args.party = {
 							order = 7,
 							type = "range",
 							name = L["Horizontal Spacing"],
-							min = -1, max = 50, step = 1
+							min = -1, max = E.private.CustomTweaks.UnitFrameSpacingLimits and 200 or 50, step = 1
 						},
 						verticalSpacing = {
 							order = 8,
 							type = "range",
 							name = L["Vertical Spacing"],
-							min = -1, max = 50, step = 1
+							min = -1, max = E.private.CustomTweaks.UnitFrameSpacingLimits and 200 or 50, step = 1
 						},
 						groupSpacing = {
 							order = 9,
@@ -6608,13 +6920,13 @@ E.Options.args.unitframe.args.raid = {
 							order = 9,
 							type = "range",
 							name = L["Horizontal Spacing"],
-							min = -1, max = 50, step = 1
+							min = -1, max = E.private.CustomTweaks.UnitFrameSpacingLimits and 200 or 50, step = 1
 						},
 						verticalSpacing = {
 							order = 10,
 							type = "range",
 							name = L["Vertical Spacing"],
-							min = -1, max = 50, step = 1
+							min = -1, max = E.private.CustomTweaks.UnitFrameSpacingLimits and 200 or 50, step = 1
 						},
 						groupSpacing = {
 							order = 11,
@@ -7027,13 +7339,13 @@ E.Options.args.unitframe.args.raid40 = {
 							order = 9,
 							type = "range",
 							name = L["Horizontal Spacing"],
-							min = -1, max = 50, step = 1
+							min = -1, max = E.private.CustomTweaks.UnitFrameSpacingLimits and 200 or 50, step = 1
 						},
 						verticalSpacing = {
 							order = 10,
 							type = "range",
 							name = L["Vertical Spacing"],
-							min = -1, max = 50, step = 1
+							min = -1, max = E.private.CustomTweaks.UnitFrameSpacingLimits and 200 or 50, step = 1
 						},
 						groupSpacing = {
 							order = 11,

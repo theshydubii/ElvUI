@@ -70,6 +70,139 @@ local SEARCH = SEARCH
 
 local SEARCH_STRING = ""
 
+local function StyleBagButton(button, label, isIcon, color)
+	if not button.defaultNormalTexture then
+		local normal = button:GetNormalTexture()
+		local pushed = button:GetPushedTexture()
+		button.defaultNormalTexture = normal and normal:GetTexture()
+		button.defaultPushedTexture = pushed and pushed:GetTexture()
+	end
+
+	if not button.label then
+		button.label = button:CreateFontString(nil, "OVERLAY")
+		button.label:Point("CENTER", button)
+		button.label:SetJustifyH("CENTER")
+	end
+
+	if isIcon then
+		button:Size(16 + E.Border)
+		button:SetNormalTexture(button.defaultNormalTexture)
+		button:SetPushedTexture(button.defaultPushedTexture or button.defaultNormalTexture)
+		button.label:Hide()
+	else
+		button:Size(55, 10)
+		button:SetNormalTexture(nil)
+		button:SetPushedTexture(nil)
+		button.label:SetText(label)
+		button.label:FontTemplate(E.Libs.LSM:Fetch("font", E.db.bags.countFont), 10, "OUTLINE")
+		button.label:Show()
+		button:SetTemplate("Default", true)
+		button:SetBackdropColor(color.r, color.g, color.b)
+	end
+end
+
+function B:UpdateBagButtonStyle(frame, isBank)
+	if not frame then return end
+
+	local settings = E.db.CustomTweaks.BagButtons
+	local isIcon = settings.style == "ICON"
+	local color = E:GetColorTable(settings.buttonColor)
+	local buttons = isBank and {
+		{frame.sortButton, L["Sort Bags"]},
+		{frame.purchaseBagButton, L["Purchase Bags"]},
+		{frame.bagsButton, L["Toggle Bags"]}
+	} or {
+		{frame.vendorGraysButton, L["Vendor Grays"]},
+		{frame.sortButton, L["Sort Bags"]},
+		{frame.bagsButton, L["Toggle Bags"]}
+	}
+
+	for _, entry in ipairs(buttons) do
+		entry[1]:ClearAllPoints()
+		StyleBagButton(entry[1], entry[2], isIcon, color)
+	end
+
+	if isBank then
+		StyleBagButton(frame.purchaseBagButton, L["Purchase Bags"], isIcon, color)
+	end
+
+	if not frame.stackButton then
+		local stack = CreateFrame("Button", frame:GetName().."StackButton", frame.holderFrame)
+		stack:SetTemplate()
+		stack:SetNormalTexture("Interface\\ICONS\\INV_Pet_RatCage")
+		stack:SetPushedTexture("Interface\\ICONS\\INV_Pet_RatCage")
+		stack:StyleButton(nil, true)
+		stack:SetScript("OnEnter", B.Tooltip_Show)
+		stack:SetScript("OnLeave", GameTooltip_Hide)
+		stack:SetScript("OnClick", function()
+			local source, destination, operation
+			if isBank then
+				source, destination, operation = "bank", "bags", "bank"
+			else
+				source, destination, operation = "bags", "bank", "bags"
+			end
+
+			if IsShiftKeyDown() then
+				B:CommandDecorator(B.Stack, source.." "..destination)()
+			else
+				B:CommandDecorator(B.Compress, operation)()
+			end
+		end)
+		frame.stackButton = stack
+	end
+
+	frame.stackButton.ttText = isBank and L["Stack Items In Bank"] or L["Stack Items In Bags"]
+	frame.stackButton.ttText2 = L["Hold Shift:"]
+	frame.stackButton.ttText2desc = isBank and L["Stack Items To Bags"] or L["Stack Items To Bank"]
+	frame.stackButton:ClearAllPoints()
+	StyleBagButton(frame.stackButton, L["Stack"], isIcon, color)
+	frame.stackButton:SetShown(settings.stackButton)
+
+	if isIcon then
+		if frame.keyButton then frame.keyButton:Show() end
+		if settings.stackButton then
+			frame.stackButton:Point("RIGHT", isBank and frame.bagText or frame.goldText, "LEFT", -5, E.Border * 2)
+			frame.sortButton:Point("RIGHT", frame.stackButton, "LEFT", -5, 0)
+		else
+			frame.sortButton:Point("RIGHT", isBank and frame.bagText or frame.goldText, "LEFT", -5, E.Border * 2)
+		end
+		if isBank then
+			frame.bagsButton:Point("RIGHT", frame.sortButton, "LEFT", -5, 0)
+			frame.purchaseBagButton:Point("RIGHT", frame.bagsButton, "LEFT", -5, 0)
+		else
+			frame.keyButton:Point("RIGHT", frame.sortButton, "LEFT", -5, 0)
+			frame.bagsButton:Point("RIGHT", frame.keyButton, "LEFT", -5, 0)
+			frame.vendorGraysButton:Point("RIGHT", frame.bagsButton, "LEFT", -5, 0)
+		end
+		frame.editBox:ClearAllPoints()
+		frame.editBox:Point("BOTTOMLEFT", frame.holderFrame, "TOPLEFT", (E.Border * 2) + 18, E.Border * 2 + 2)
+		frame.editBox:Point("RIGHT", isBank and frame.purchaseBagButton or frame.vendorGraysButton, "LEFT", -5, 0)
+	else
+		if isBank then
+			frame.purchaseBagButton:ClearAllPoints()
+			frame.bagsButton:ClearAllPoints()
+			frame.sortButton:Point("TOP", frame, "TOP", 29, -4)
+			frame.purchaseBagButton:Point("RIGHT", frame.sortButton, "LEFT", -3, 0)
+			frame.bagsButton:Point("RIGHT", frame.purchaseBagButton, "LEFT", -3, 0)
+			frame.stackButton:Point("LEFT", frame.sortButton, "RIGHT", 3, 0)
+			frame.editBox:ClearAllPoints()
+			frame.editBox:Point("BOTTOMLEFT", frame.holderFrame, "TOPLEFT", (E.Border * 2) + 18, E.Border * 2 + 2)
+			frame.editBox:Point("RIGHT", frame.bagText, "LEFT", -5, 0)
+		else
+			frame.keyButton:Hide()
+			frame.bagsButton:ClearAllPoints()
+			frame.vendorGraysButton:ClearAllPoints()
+			frame.vendorGraysButton:Point("TOP", frame, "TOP", 0, -4)
+			frame.sortButton:Point("LEFT", frame.vendorGraysButton, "RIGHT", 3, 0)
+			frame.stackButton:Point("LEFT", frame.sortButton, "RIGHT", 3, 0)
+			frame.bagsButton:Point("RIGHT", frame.vendorGraysButton, "LEFT", -3, 0)
+			frame.editBox:ClearAllPoints()
+			frame.editBox:Point("BOTTOMLEFT", frame.holderFrame, "TOPLEFT", (E.Border * 2) + 18, E.Border * 2 + 2)
+			frame.editBox:Point("RIGHT", frame.goldText, "LEFT", -5, 0)
+		end
+	end
+end
+
 local BAG_CONTROL_OPEN_EVENTS = {
 	MAIL_SHOW = "mail",
 	MERCHANT_SHOW = "vendor",
@@ -1522,6 +1655,9 @@ function B:ContructContainerFrame(name, isBank)
 
 	tinsert(UISpecialFrames, f:GetName())
 	tinsert(B.BagFrames, f)
+	if E.private.CustomTweaks.BagButtons then
+		B:UpdateBagButtonStyle(f, isBank)
+	end
 	return f
 end
 

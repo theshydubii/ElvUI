@@ -639,8 +639,59 @@ E.Options.args.general = {
 						E:StaticPopup_Show("PRIVATE_RL")
 					end
 				},
-				vehicleSeatIndicatorSize = {
+				noBorders = {
 					order = 8,
+					type = "toggle",
+					name = L["No Borders"],
+					desc = L["Remove borders from ElvUI templates."],
+					get = function() return E.private.CustomTweaks.NoBorders end,
+					set = function(_, value)
+						E.private.CustomTweaks.NoBorders = value
+						E:StaticPopup_Show("PRIVATE_RL")
+					end
+				},
+				raidControl = {
+					order = 9,
+					type = "group",
+					name = L["Raid Control"],
+					guiInline = true,
+					args = {
+						enable = {
+							order = 1,
+							type = "toggle",
+							name = L["Enable"],
+							get = function() return E.private.CustomTweaks.RaidControl end,
+							set = function(_, value)
+								E.private.CustomTweaks.RaidControl = value
+								E:StaticPopup_Show("PRIVATE_RL")
+							end
+						},
+						hide = {
+							order = 2,
+							type = "toggle",
+							name = L["Hide Raid Control"],
+							disabled = function() return not E.private.CustomTweaks.RaidControl or not E.private.general.raidUtility end,
+							get = function() return E.db.CustomTweaks.RaidControl.hide end,
+							set = function(_, value)
+								E.db.CustomTweaks.RaidControl.hide = value
+								E:GetModule("RaidUtility"):UpdateCustomRaidControl()
+							end
+						},
+						transparent = {
+							order = 3,
+							type = "toggle",
+							name = L["Use Transparent Template"],
+							disabled = function() return not E.private.CustomTweaks.RaidControl or not E.private.general.raidUtility end,
+							get = function() return E.db.CustomTweaks.RaidControl.transparent end,
+							set = function(_, value)
+								E.db.CustomTweaks.RaidControl.transparent = value
+								E:GetModule("RaidUtility"):UpdateCustomRaidControl()
+							end
+						}
+					}
+				},
+				vehicleSeatIndicatorSize = {
+					order = 10,
 					type = "range",
 					name = L["Vehicle Seat Indicator Size"],
 					min = 64, max = 128, step = 4,

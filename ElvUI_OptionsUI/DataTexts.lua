@@ -144,6 +144,17 @@ E.Options.args.datatexts = {
 							type = "toggle",
 							name = L["Show Coins"],
 							desc = L["Use coin icons instead of colored text."]
+						},
+						bagsTextFormat = {
+							order = 8,
+							type = "select",
+							name = L["Bags Text Format"],
+							values = {
+								FREE = L["Only Free Slots"],
+								USED = L["Only Used Slots"],
+								FREE_TOTAL = L["Free/Total"],
+								USED_TOTAL = L["Used/Total"]
+							}
 						}
 					}
 				},

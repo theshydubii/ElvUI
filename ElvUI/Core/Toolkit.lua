@@ -79,6 +79,7 @@ end
 
 local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelMode, isUnitFrameElement)
 	GetTemplate(template, isUnitFrameElement)
+	local noBorders = E.private.CustomTweaks and E.private.CustomTweaks.NoBorders
 
 	frame.template = template or "Default"
 	if glossTex then frame.glossTex = glossTex end
@@ -87,18 +88,25 @@ local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelM
 	if isUnitFrameElement then frame.isUnitFrameElement = isUnitFrameElement end
 
 	local bgFile = glossTex and E.media.glossTex or E.media.blankTex
+	local edgeFile, edgeSize = E.media.blankTex, E.mult
+	if noBorders then
+		edgeFile, edgeSize = nil, 0
+	end
 
 	if template ~= "NoBackdrop" then
 		frame:SetBackdrop({
 			bgFile = bgFile,
-			edgeFile = E.media.blankTex,
-			tile = false, tileSize = 0, edgeSize = E.mult,
+			edgeFile = edgeFile,
+			tile = false, tileSize = 0, edgeSize = edgeSize,
 			insets = {left = 0, right = 0, top = 0, bottom = 0}
 		})
 
 		frame:SetBackdropColor(backdropr, backdropg, backdropb, backdropa)
 
-		if not E.PixelMode and not frame.forcePixelMode then
+		if noBorders then
+			if frame.iborder then frame.iborder:Hide() end
+			if frame.oborder then frame.oborder:Hide() end
+		elseif not E.PixelMode and not frame.forcePixelMode then
 			if not frame.iborder then
 				local border = CreateFrame("Frame", nil, frame)
 				border:SetInside(frame, E.mult, E.mult)
@@ -109,6 +117,8 @@ local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelM
 				})
 				border:SetBackdropBorderColor(0, 0, 0, 1)
 				frame.iborder = border
+			else
+				frame.iborder:Show()
 			end
 
 			if not frame.oborder then
@@ -122,12 +132,18 @@ local function SetTemplate(frame, template, glossTex, ignoreUpdates, forcePixelM
 				})
 				border:SetBackdropBorderColor(0, 0, 0, 1)
 				frame.oborder = border
+			else
+				frame.oborder:Show()
 			end
 		end
 	else
 		frame:SetBackdrop(nil)
 	end
-	frame:SetBackdropBorderColor(borderr, borderg, borderb)
+	if noBorders then
+		frame:SetBackdropBorderColor(0, 0, 0, 0)
+	else
+		frame:SetBackdropBorderColor(borderr, borderg, borderb)
+	end
 
 	if not frame.ignoreUpdates then
 		if frame.isUnitFrameElement then

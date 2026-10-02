@@ -25,7 +25,17 @@ local function OnEvent(self)
 	for i = 0, NUM_BAG_SLOTS do
 		free, total = free + GetContainerNumFreeSlots(i), total + GetContainerNumSlots(i)
 	end
-	self.text:SetFormattedText(displayString, total - free, total)
+	local used = total - free
+	local textFormat = E.db.datatexts.bagsTextFormat
+	if textFormat == "FREE" then
+		self.text:SetFormattedText(displayString, free)
+	elseif textFormat == "USED" then
+		self.text:SetFormattedText(displayString, used)
+	elseif textFormat == "FREE_TOTAL" then
+		self.text:SetFormattedText(displayString, free, total)
+	else
+		self.text:SetFormattedText(displayString, used, total)
+	end
 
 	lastPanel = self
 end
@@ -80,7 +90,12 @@ local function OnEnter(self)
 end
 
 local function ValueColorUpdate(hex)
-	displayString = join("", L["Bags"], ": ", hex, "%d/%d|r")
+	local textFormat = E.db.datatexts.bagsTextFormat
+	if textFormat == "FREE" or textFormat == "USED" then
+		displayString = join("", L["Bags"], ": ", hex, "%d|r")
+	else
+		displayString = join("", L["Bags"], ": ", hex, "%d/%d|r")
+	end
 
 	if lastPanel ~= nil then
 		OnEvent(lastPanel)

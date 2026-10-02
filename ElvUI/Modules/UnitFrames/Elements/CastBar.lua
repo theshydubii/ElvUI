@@ -36,6 +36,15 @@ local CASTBAR_OVERLAY_UNITS = {
 	arena = true
 }
 
+local CASTBAR_CUSTOM_TWEAK_UNITS = {
+	player = "Player",
+	pet = "Pet",
+	target = "Target",
+	focus = "Focus",
+	arena = "Arena",
+	boss = "Boss"
+}
+
 local function MigrateCastbarOverlaySettings()
 	local legacy = E.db.CBO
 	if not legacy or legacy.migrated then return end
@@ -348,6 +357,27 @@ function UF:Configure_Castbar(frame)
 		end
 
 		ConfigureCastbarOverlay(frame, castbar, db.castbar)
+
+		local customUnit = CASTBAR_CUSTOM_TWEAK_UNITS[frame.unitframeType]
+		if customUnit then
+			if E.private.CustomTweaks.CastbarText then
+				local textSettings = E.db.CustomTweaks.CastbarText[customUnit]
+				local textColor = textSettings.text.color
+				local durationColor = textSettings.duration.color
+				castbar.Text:ClearAllPoints()
+				castbar.Text:Point(textSettings.text.point, castbar, textSettings.text.point, textSettings.text.xOffset, textSettings.text.yOffset)
+				castbar.Text:SetTextColor(textColor.r, textColor.g, textColor.b, textColor.a)
+				castbar.Time:ClearAllPoints()
+				castbar.Time:Point(textSettings.duration.point, castbar, textSettings.duration.point, textSettings.duration.xOffset, textSettings.duration.yOffset)
+				castbar.Time:SetTextColor(durationColor.r, durationColor.g, durationColor.b, durationColor.a)
+			end
+
+			if E.private.CustomTweaks.CastbarFont then
+				local fontSettings = E.db.CustomTweaks.CastbarFont[customUnit]
+				castbar.Text:FontTemplate(E.Libs.LSM:Fetch("font", fontSettings.text.font), fontSettings.text.fontSize, fontSettings.text.fontOutline)
+				castbar.Time:FontTemplate(E.Libs.LSM:Fetch("font", fontSettings.duration.font), fontSettings.duration.fontSize, fontSettings.duration.fontOutline)
+			end
+		end
 
 		castbar.custom_backdrop = UF.db.colors.customcastbarbackdrop and UF.db.colors.castbar_backdrop
 		UF:ToggleTransparentStatusBar(UF.db.colors.transparentCastbar, castbar, castbar.bg, nil, UF.db.colors.invertCastbar)

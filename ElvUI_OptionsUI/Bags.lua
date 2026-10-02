@@ -7,6 +7,66 @@ local gsub, match = string.gsub, string.match
 
 local GameTooltip = _G["GameTooltip"]
 
+local bagButtonsOptions = {
+	order = 19,
+	type = "group",
+	name = L["Bag Buttons"],
+	guiInline = true,
+	args = {
+		enable = {
+			order = 1,
+			type = "toggle",
+			name = L["Enable"],
+			get = function() return E.private.CustomTweaks.BagButtons end,
+			set = function(_, value)
+				E.private.CustomTweaks.BagButtons = value
+				E:StaticPopup_Show("PRIVATE_RL")
+			end
+		},
+		stackButton = {
+			order = 2,
+			type = "toggle",
+			name = L["Add 'Stack' Button"],
+			disabled = function() return not E.private.CustomTweaks.BagButtons end,
+			get = function() return E.db.CustomTweaks.BagButtons.stackButton end,
+			set = function(_, value)
+				E.db.CustomTweaks.BagButtons.stackButton = value
+				B:UpdateBagButtonStyle(B.BagFrame, false)
+				B:UpdateBagButtonStyle(B.BankFrame, true)
+			end
+		},
+		style = {
+			order = 3,
+			type = "select",
+			name = L["Button Style"],
+			values = {ICON = L["Icons"], TEXTURE = L["Textures"]},
+			disabled = function() return not E.private.CustomTweaks.BagButtons end,
+			get = function() return E.db.CustomTweaks.BagButtons.style end,
+			set = function(_, value)
+				E.db.CustomTweaks.BagButtons.style = value
+				B:UpdateBagButtonStyle(B.BagFrame, false)
+				B:UpdateBagButtonStyle(B.BankFrame, true)
+			end
+		},
+		buttonColor = {
+			order = 4,
+			type = "color",
+			name = L["Button Color"],
+			get = function()
+				local color = E.db.CustomTweaks.BagButtons.buttonColor
+				local default = P.CustomTweaks.BagButtons.buttonColor
+				return color.r, color.g, color.b, color.a, default.r, default.g, default.b
+			end,
+			disabled = function() return not E.private.CustomTweaks.BagButtons or E.db.CustomTweaks.BagButtons.style == "ICON" end,
+			set = function(_, r, g, b)
+				E.db.CustomTweaks.BagButtons.buttonColor = {r = r, g = g, b = b}
+				B:UpdateBagButtonStyle(B.BagFrame, false)
+				B:UpdateBagButtonStyle(B.BankFrame, true)
+			end
+		}
+	}
+}
+
 E.Options.args.bags = {
 	type = "group",
 	name = L["BAGSLOT"],
@@ -518,7 +578,7 @@ E.Options.args.bags = {
 							disabled = function() return not E.db.bags.questItemColors end
 						}
 					}
-				}
+				},
 			}
 		},
 		bagBar = {
@@ -888,3 +948,5 @@ E.Options.args.bags = {
 		}
 	}
 }
+
+E.Options.args.bags.args.general.args.bagButtons = bagButtonsOptions

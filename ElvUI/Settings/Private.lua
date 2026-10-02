@@ -138,6 +138,22 @@ V.actionbar = {
 	}
 }
 
+V.CustomTweaks = {
+	ClickThroughActionBars = false,
+	PushedColor = false,
+	BagButtons = false,
+	ChatMaxLines = false,
+	BagsTextFormat = false,
+	MinimapSizeLimits = false,
+	RaidControl = false,
+	NoBorders = false,
+	AuraIconSpacing = false,
+	CastbarText = false,
+	PowerBarTexture = false,
+	UnitFrameSpacingLimits = false,
+	CastbarFont = false
+}
+
 V.worldmap = {
 	enable = true
 }

@@ -133,6 +133,8 @@ function AB:PositionAndSizeBar(barName)
 	bar:Height(barHeight)
 
 	bar.mouseover = bar.db.mouseover
+	local clickThrough = E.private.CustomTweaks.ClickThroughActionBars and E.db.CustomTweaks.ClickThroughActionBars[barName]
+	bar:EnableMouse(not clickThrough)
 
 	local horizontalGrowth, verticalGrowth
 	if point == "TOPLEFT" or point == "TOPRIGHT" then
@@ -208,6 +210,7 @@ function AB:PositionAndSizeBar(barName)
 		else
 			button:Show()
 		end
+		button:EnableMouse(not clickThrough)
 
 		self:StyleButton(button, nil, (self.LBFGroup or self.MSQGroup) and E.private.actionbar.lbf.enable and true or nil)
 	end
@@ -582,6 +585,19 @@ function AB:StyleButton(button, noBackdrop, useMasque)
 		button:StyleButton()
 	else
 		button:StyleButton(true, true, true)
+	end
+
+	local pushedColor = E.private.CustomTweaks.PushedColor and E.db.CustomTweaks.PushedColor.Color
+	if pushedColor and button.SetPushedTexture then
+		if not button.pushedmod then
+			button.pushedmod = button:CreateTexture(nil, "OVERLAY")
+			button.pushedmod:SetInside()
+		end
+		button.pushedmod:SetTexture(pushedColor.r, pushedColor.g, pushedColor.b, pushedColor.a)
+		button:SetPushedTexture(button.pushedmod)
+	elseif button.pushedmod then
+		button:SetPushedTexture(button.pushed)
+		button.pushedmod = nil
 	end
 
 	if not self.handledbuttons[button] then

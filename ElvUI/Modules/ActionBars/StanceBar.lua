@@ -129,6 +129,8 @@ function AB:PositionAndSizeBarShapeShift()
 	bar.db = self.db.stanceBar
 	bar.db.position = nil --Depreciated
 	bar.mouseover = self.db.stanceBar.mouseover
+	local clickThrough = E.private.CustomTweaks.ClickThroughActionBars and E.db.CustomTweaks.ClickThroughActionBars.stanceBar
+	bar:EnableMouse(not clickThrough)
 
 	if bar.LastButton and numButtons > bar.LastButton then
 		numButtons = bar.LastButton
@@ -250,6 +252,7 @@ function AB:PositionAndSizeBarShapeShift()
 			button:SetScale(1)
 			button:SetAlpha(bar.db.alpha)
 		end
+		button:EnableMouse(not clickThrough)
 
 		self:StyleButton(button, nil, (self.LBFGroup or self.MSQGroup) and E.private.actionbar.lbf.enable or nil)
 	end

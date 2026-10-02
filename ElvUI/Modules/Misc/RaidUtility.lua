@@ -56,6 +56,15 @@ function RU:ToggleRaidUtil(event)
 		return
 	end
 
+	if E.private.CustomTweaks.RaidControl and E.db.CustomTweaks.RaidControl.hide then
+		RaidUtility_ShowButton:Hide()
+		RaidUtilityPanel:Hide()
+		if event == "PLAYER_REGEN_ENABLED" then
+			self:UnregisterEvent("PLAYER_REGEN_ENABLED", "ToggleRaidUtil")
+		end
+		return
+	end
+
 	if CheckRaidStatus() then
 		if RaidUtilityPanel.toggled == true then
 			RaidUtility_ShowButton:Hide()
@@ -72,6 +81,21 @@ function RU:ToggleRaidUtil(event)
 	if event == "PLAYER_REGEN_ENABLED" then
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED", "ToggleRaidUtil")
 	end
+end
+
+function RU:UpdateCustomRaidControl()
+	if not E.private.CustomTweaks.RaidControl then return end
+	if InCombatLockdown() then
+		self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateCustomRaidControl")
+		return
+	end
+
+	local template = E.db.CustomTweaks.RaidControl.transparent and "Transparent" or "Default"
+	RaidUtility_ShowButton:SetTemplate(template, template == "Default")
+	RaidUtility_CloseButton:SetTemplate(template, template == "Default")
+	RaidUtilityPanel:SetTemplate(template, template == "Default")
+	self:ToggleRaidUtil()
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED", "UpdateCustomRaidControl")
 end
 
 function RU:Initialize()
@@ -216,6 +240,7 @@ function RU:Initialize()
 	self:RegisterEvent("RAID_ROSTER_UPDATE", "ToggleRaidUtil")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "ToggleRaidUtil")
 	self:RegisterEvent("PARTY_MEMBERS_CHANGED", "ToggleRaidUtil")
+	self:UpdateCustomRaidControl()
 end
 
 local function InitializeCallback()

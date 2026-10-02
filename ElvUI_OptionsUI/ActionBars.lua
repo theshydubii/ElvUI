@@ -27,6 +27,39 @@ local textPoints = {
 
 local ACD = E.Libs.AceConfigDialog
 
+local function UpdateClickThrough(barName)
+	if barName == "barPet" then
+		AB:PositionAndSizeBarPet()
+	elseif barName == "stanceBar" then
+		AB:PositionAndSizeBarShapeShift()
+	elseif AB.handledBars[barName] then
+		AB:PositionAndSizeBar(barName)
+	end
+end
+
+local function UpdatePushedColor()
+	for barName in pairs(AB.handledBars) do
+		AB:PositionAndSizeBar(barName)
+	end
+	AB:PositionAndSizeBarPet()
+	AB:PositionAndSizeBarShapeShift()
+end
+
+local function ClickThroughOption(order, barName, name, optional)
+	return {
+		order = order,
+		type = "toggle",
+		name = name,
+		hidden = function() return optional and not E:IsAddOnEnabled("ElvUI_ExtraActionBars") end,
+		disabled = function() return not E.private.CustomTweaks.ClickThroughActionBars end,
+		get = function() return E.db.CustomTweaks.ClickThroughActionBars[barName] end,
+		set = function(_, value)
+			E.db.CustomTweaks.ClickThroughActionBars[barName] = value
+			UpdateClickThrough(barName)
+		end
+	}
+end
+
 local function BuildABConfig()
 	group.general = {
 		order = 1,
@@ -152,6 +185,79 @@ local function BuildABConfig()
 				min = 0, max = 1, step = 0.01,
 				isPercent = true,
 				set = function(info, value) E.db.actionbar[info[#info]] = value AB.fadeParent:SetAlpha(1-value) end
+			},
+			clickThroughGroup = {
+				order = 18,
+				type = "group",
+				name = L["Click Through"],
+				guiInline = true,
+				args = {
+					enable = {
+						order = 1,
+						type = "toggle",
+						name = L["Enable"],
+						get = function() return E.private.CustomTweaks.ClickThroughActionBars end,
+						set = function(_, value)
+							E.private.CustomTweaks.ClickThroughActionBars = value
+							E:StaticPopup_Show("PRIVATE_RL")
+						end
+					},
+					bars = {
+						order = 2,
+						type = "group",
+						name = L["Buttons"],
+						guiInline = true,
+						disabled = function() return not E.private.CustomTweaks.ClickThroughActionBars end,
+						args = {
+							bar1 = ClickThroughOption(1, "bar1", L["Bar "]..1),
+							bar2 = ClickThroughOption(2, "bar2", L["Bar "]..2),
+							bar3 = ClickThroughOption(3, "bar3", L["Bar "]..3),
+							bar4 = ClickThroughOption(4, "bar4", L["Bar "]..4),
+							bar5 = ClickThroughOption(5, "bar5", L["Bar "]..5),
+							bar6 = ClickThroughOption(6, "bar6", L["Bar "]..6),
+							bar7 = ClickThroughOption(7, "bar7", L["Bar "]..7, true),
+							bar8 = ClickThroughOption(8, "bar8", L["Bar "]..8, true),
+							bar9 = ClickThroughOption(9, "bar9", L["Bar "]..9, true),
+							bar10 = ClickThroughOption(10, "bar10", L["Bar "]..10, true),
+							barPet = ClickThroughOption(11, "barPet", L["Pet Bar"]),
+							stanceBar = ClickThroughOption(12, "stanceBar", L["Stance Bar"])
+						}
+					}
+				}
+			},
+			pushedColorGroup = {
+				order = 19,
+				type = "group",
+				name = L["Pushed Color"],
+				guiInline = true,
+				args = {
+					enable = {
+						order = 1,
+						type = "toggle",
+						name = L["Enable"],
+						get = function() return E.private.CustomTweaks.PushedColor end,
+						set = function(_, value)
+							E.private.CustomTweaks.PushedColor = value
+							E:StaticPopup_Show("PRIVATE_RL")
+						end
+					},
+					color = {
+						order = 2,
+						type = "color",
+						name = L["Color"],
+						hasAlpha = true,
+						disabled = function() return not E.private.CustomTweaks.PushedColor end,
+						get = function()
+							local color = E.db.CustomTweaks.PushedColor.Color
+							local default = P.CustomTweaks.PushedColor.Color
+							return color.r, color.g, color.b, color.a, default.r, default.g, default.b, default.a
+						end,
+						set = function(_, r, g, b, a)
+							E.db.CustomTweaks.PushedColor.Color = {r = r, g = g, b = b, a = a}
+							UpdatePushedColor()
+						end
+					}
+				}
 			},
 			equippedItem = {
 				order = 15,

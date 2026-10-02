@@ -142,6 +142,13 @@ function UF:Configure_Auras(frame, auraType)
 	auraType = string.lower(auraType)
 	auras.db = db[auraType]
 
+	local customSpacing = E.private.CustomTweaks.AuraIconSpacing and E.db.CustomTweaks.AuraIconSpacing
+	if customSpacing and customSpacing.units[frame.unitframeType] then
+		auras.spacing = customSpacing.spacing
+	else
+		auras.spacing = E.Spacing
+	end
+
 	local rows = auras.db.numrows
 	auras.forceShow = frame.forceShowAuras
 	auras.num = auras.db.perrow * rows
