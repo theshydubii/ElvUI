@@ -1203,6 +1203,10 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 						control:SetNumLines(tonumber(v.multiline) or 4)
 					end
 					control:SetLabel(name)
+					if v.compactLabel then
+						control:SetHeight(42)
+						control.alignoffset = 31
+					end
 					control:SetCallback("OnEnterPressed",ActivateControl)
 					local text = GetOptionsMemberValue("get",v, options, path, appName)
 					if type(text) ~= "string" then
@@ -1508,6 +1512,7 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 
 				--Common Init
 				if control then
+					control.xOffset = v.xOffset
 					local customWidth = control.customWidth or GetOptionsMemberValue("customWidth",v,options,path,appName)
 					if control.width ~= "fill" or customWidth then
 						if customWidth then

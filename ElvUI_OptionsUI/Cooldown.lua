@@ -315,3 +315,7 @@ group(7,	"actionbar",	L["ActionBars"])
 group(8,	"bags",			L["Bags"])
 group(9,	"nameplates",	L["NamePlates"])
 group(10,	"unitframe",	L["UnitFrames"])
+
+E.Options.args.cooldown.order = 2
+E.Options.args.actionbar.args.cooldownText = E.Options.args.cooldown
+E.Options.args.cooldown = nil

@@ -7,25 +7,23 @@ local function SetOrder(name, order)
 	end
 end
 
-SetOrder("general", 10)
-SetOrder("enhanced", 20)
 SetOrder("general", 1)
-
--- Match the reference ordering: main settings sections share the next order and sort by name.
-SetOrder("actionbar", 2)
-SetOrder("auras", 2)
-SetOrder("bags", 2)
-SetOrder("chat", 2)
-SetOrder("cooldown", 2)
-SetOrder("databars", 2)
-SetOrder("datatexts", 2)
 SetOrder("enhanced", 2)
-SetOrder("maps", 2)
-SetOrder("nameplate", 2)
-SetOrder("skins", 2)
-SetOrder("tooltip", 2)
-SetOrder("unitframe", 2)
-SetOrder("addOnSkins", 2)
+SetOrder("addOnSkins", 3)
+
+-- Keep the main settings sections together after General, Enhanced, and AddOn Skins.
+SetOrder("actionbar", 4)
+SetOrder("auras", 4)
+SetOrder("bags", 4)
+SetOrder("chat", 4)
+SetOrder("cooldown", 4)
+SetOrder("databars", 4)
+SetOrder("datatexts", 4)
+SetOrder("maps", 4)
+SetOrder("nameplate", 4)
+SetOrder("skins", 4)
+SetOrder("tooltip", 4)
+SetOrder("unitframe", 4)
 
 -- Dividers are disabled for now.
 -- AddDivider("navigationDividerFrames", 3)
@@ -35,5 +33,5 @@ SetOrder("addOnSkins", 2)
 
 SetOrder("tagGroup", 4)
 SetOrder("modulecontrol", 5)
-SetOrder("filters", 3)
+SetOrder("filters", 5)
 SetOrder("profiles", 4)

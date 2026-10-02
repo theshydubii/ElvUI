@@ -94,6 +94,8 @@ local basekeys={
 	width=optstringnumber,
 	-- below here were created by ElvUI --
 	customWidth=optnumber,
+	xOffset=optnumber,
+	compactLabel=optbool,
 	textWidth=optmethodbool,
 	sortByValue=optmethodbool,
 	dragdrop=optmethodbool,

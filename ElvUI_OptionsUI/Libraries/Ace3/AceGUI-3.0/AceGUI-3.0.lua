@@ -748,7 +748,7 @@ AceGUI:RegisterLayout("Flow",
 			frame:ClearAllPoints()
 			if i == 1 then
 				-- anchor the first control to the top left
-				frame:SetPoint("TOPLEFT", content)
+				frame:SetPoint("TOPLEFT", content, "TOPLEFT", child.xOffset or 0, 0)
 				rowheight = frameheight
 				rowoffset = frameoffset
 				rowstart = frame
@@ -767,7 +767,7 @@ AceGUI:RegisterLayout("Flow",
 						break
 					end
 					--anchor the previous row, we will now know its height and offset
-					rowstart:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -(height + (rowoffset - rowstartoffset) + 3))
+					rowstart:SetPoint("TOPLEFT", content, "TOPLEFT", rowstart.xOffset or 0, -(height + (rowoffset - rowstartoffset) + 3))
 					height = height + rowheight + 3
 					--save this as the rowstart so we can anchor it after the row is complete and we have the max height and offset of controls in it
 					rowstart = frame
@@ -828,7 +828,7 @@ AceGUI:RegisterLayout("Flow",
 		if isfullheight then
 			rowstart:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -height)
 		elseif rowstart then
-			rowstart:SetPoint("TOPLEFT", content, "TOPLEFT", 0, -(height + (rowoffset - rowstartoffset) + 3))
+			rowstart:SetPoint("TOPLEFT", content, "TOPLEFT", rowstart.xOffset or 0, -(height + (rowoffset - rowstartoffset) + 3))
 		end
 
 		height = height + rowheight + 3

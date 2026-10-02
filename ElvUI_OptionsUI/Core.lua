@@ -30,6 +30,66 @@ local UnitIsFriend = UnitIsFriend
 local UnitIsPlayer = UnitIsPlayer
 local GameTooltip_Hide = GameTooltip_Hide
 local GameFontHighlightSmall = _G.GameFontHighlightSmall
+local searchQuery = ""
+local searchResults = {
+	type = "group",
+	order = 8,
+	name = "Search Results",
+	childGroups = "tree",
+	hidden = function() return searchQuery == "" end,
+	args = {}
+}
+
+local function UpdateSearchResults(query)
+	local args = searchResults.args
+	for key in pairs(args) do
+		args[key] = nil
+	end
+
+	local search = query:lower():match("^%s*(.-)%s*$")
+	if search == "" then return end
+
+	local resultCount = 0
+	local function SearchOptions(group, path, groupNames)
+		for key, option in pairs(group.args or {}) do
+			if resultCount >= 50 then return end
+			if type(option) == "table" and key ~= "searchSettings" and key ~= "searchResults" and key ~= "credits" and option.hidden ~= true then
+				if option.type == "group" then
+					path[#path + 1] = key
+					groupNames[#groupNames + 1] = type(option.name) == "string" and option.name or ""
+					SearchOptions(option, path, groupNames)
+					groupNames[#groupNames] = nil
+					path[#path] = nil
+				elseif option.type ~= "description" and #path > 0 then
+					local optionName = type(option.name) == "string" and option.name or ""
+					local optionDesc = type(option.desc) == "string" and option.desc or ""
+					local groupName = table.concat(groupNames, " ")
+					local searchText = (optionName .. " " .. optionDesc .. " " .. groupName):lower()
+					if searchText:find(search, 1, true) then
+						resultCount = resultCount + 1
+						local selectedPath = {unpack(path)}
+						args["result" .. resultCount] = {
+							order = resultCount,
+							type = "execute",
+							name = optionName .. "  [" .. groupName .. "]",
+							func = function() E.Libs.AceConfigDialog:SelectGroup("ElvUI", unpack(selectedPath)) end
+						}
+						if resultCount >= 50 then return end
+					end
+				end
+			end
+		end
+	end
+
+	SearchOptions(E.Options, {}, {})
+	if resultCount == 0 then
+		args.noResults = {
+			order = 1,
+			type = "description",
+			name = "No settings found."
+		}
+	end
+end
 
 --Function we can call on profile change to update GUI
 function E:RefreshGUI()
@@ -48,30 +108,33 @@ E.Options.args = {
 		width = "full"
 	},
 	RepositionWindow = {
-		order = 2,
+		order = 6,
 		type = "execute",
 		name = L["Reposition Window"],
 		desc = L["Reset the size and position of this frame."],
 		customWidth = 175,
+		xOffset = -1,
 		func = function()
 			E:UpdateConfigSize(true)
 		end
 	},
 	ToggleTutorial = {
-		order = 3,
+		order = 2,
 		type = "execute",
 		name = L["Toggle Tutorials"],
-		customWidth = 150,
+		customWidth = 145,
+		xOffset = -1,
 		func = function()
 			E:Tutorials(true)
 			E:ToggleOptionsUI()
 		end
 	},
 	Install = {
-		order = 4,
+		order = 3,
 		type = "execute",
 		name = L["Install"],
 		customWidth = 100,
+		xOffset = -1,
 		desc = L["Run the installation process."],
 		func = function()
 			E:Install()
@@ -79,37 +142,42 @@ E.Options.args = {
 		end
 	},
 	ResetAllMovers = {
-		order = 5,
+		order = 4,
 		type = "execute",
 		name = L["Reset Anchors"],
-		customWidth = 150,
+		customWidth = 145,
+		xOffset = -1,
 		desc = L["Reset all frames to their original positions."],
 		func = function()
 			E:ResetUI()
 		end
 	},
 	ToggleAnchors = {
-		order = 6,
+		order = 5,
 		type = "execute",
 		name = L["Toggle Anchors"],
-		customWidth = 150,
+		customWidth = 145,
+		xOffset = -1,
 		desc = L["Unlock various elements of the UI to be repositioned."],
 		func = function()
 			E:ToggleMoveMode()
 		end
 	},
-	LoginMessage = {
+	searchSettings = {
 		order = 7,
-		type = "toggle",
-		name = L["Login Message"],
+		type = "input",
+		name = "Search Settings",
+		desc = "Search setting names and descriptions, then select a result to open its section.",
 		customWidth = 150,
-		get = function(info)
-			return E.db.general.loginmessage
-		end,
-		set = function(info, value)
-			E.db.general.loginmessage = value
+		compactLabel = true,
+		get = function() return searchQuery end,
+		set = function(_, value)
+			searchQuery = value or ""
+			UpdateSearchResults(searchQuery)
+			E.Libs.AceConfigDialog:SelectGroup("ElvUI", "searchResults")
 		end
-	}
+	},
+	searchResults = searchResults
 }
 
 local DEVELOPERS = {
@@ -158,6 +226,7 @@ do
 		order = -1,
 		type = "group",
 		name = L["Credits"],
+		hidden = true,
 		args = {
 			text = {
 				order = 1,

@@ -1150,8 +1150,8 @@ E.Options.args.actionbar = {
 		cooldownTextShortcut = {
 			order = 6,
 			type = "execute",
-			name = L["Cooldowns"],
-			func = function() ACD:SelectGroup("ElvUI", "cooldown", "actionbar") end
+			name = L["Cooldown Text"],
+			func = function() ACD:SelectGroup("ElvUI", "actionbar", "cooldownText", "actionbar") end
 		},
 		petBarShortcut = {
 			order = 7,

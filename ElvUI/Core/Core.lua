@@ -792,13 +792,7 @@ do
 			local ver = tonumber(E.version)
 			message = tonumber(message)
 
-			if ver ~= G.general.version then
-				if not E.shownUpdatedWhileRunningPopup and not InCombatLockdown() then
-					E:StaticPopup_Show("ELVUI_UPDATED_WHILE_RUNNING")
-
-					E.shownUpdatedWhileRunningPopup = true
-				end
-			elseif message and (message > ver) then
+			if message and (message > ver) then
 				if not E.recievedOutOfDateMessage then
 					-- E:Print(gsub(L["ElvUI is out of date. You can download the newest version from https://github.com/ElvUI-WotLK/ElvUI"], "https://github.com/ElvUI%-WotLK/ElvUI", "https://github.com/theshydubii/ElvUI"))
 
