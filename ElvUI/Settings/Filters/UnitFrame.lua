@@ -8,7 +8,7 @@ local GetSpellInfo = GetSpellInfo
 local function SpellName(id)
 	local name = GetSpellInfo(id)
 	if not name then
-		print("|cff1784d1ElvUI:|r SpellID is not valid: "..id..". Please check for an updated version, if none exists report to ElvUI author.")
+		print("|cffa855f7ElvUI:|r SpellID is not valid: "..id..". Please check for an updated version, if none exists report to ElvUI author.")
 		return "Impale"
 	else
 		return name

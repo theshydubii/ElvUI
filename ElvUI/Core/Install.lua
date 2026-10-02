@@ -188,7 +188,7 @@ function E:SetupTheme(theme, noDisplayMsg)
 	if theme == "class" then
 		E.db.general.valuecolor = E:GetColor(classColor.r, classColor.g, classColor.b)
 	else
-		E.db.general.valuecolor = E:GetColor(254/255, 123/255, 44/255)
+		E.db.general.valuecolor = E:GetColor(168/255, 85/255, 247/255)
 	end
 
 	E:UpdateAll(true)

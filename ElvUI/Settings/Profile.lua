@@ -29,7 +29,7 @@ P.general = {
 	bordercolor = {r = 0, g = 0, b = 0},
 	backdropcolor = {r = 0.1, g = 0.1, b = 0.1},
 	backdropfadecolor = {r = 0.06, g = 0.06, b = 0.06, a = 0.8},
-	valuecolor = {r = 0.99, g = 0.48, b = 0.17},
+	valuecolor = {r = 168/255, g = 85/255, b = 247/255},
 	cropIcon = 2,
 	minimap = {
 		size = 176,

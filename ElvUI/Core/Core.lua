@@ -52,7 +52,7 @@ local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 --Constants
 E.noop = function() end
-E.title = format("|cff1784d1E|r|cffe5e3e3lvUI|r")
+E.title = format("|cff6d28d9E|cff7c3aedl|cff8b5cf6v|cffa78bfaU|cffc4b5fdI|r")
 E.myfaction, E.myLocalizedFaction = UnitFactionGroup("player")
 E.mylevel = UnitLevel("player")
 E.myLocalizedClass, E.myclass = UnitClass("player")
@@ -66,7 +66,7 @@ E.resolution = GetCVar("gxResolution")
 E.screenwidth, E.screenheight = tonumber(match(E.resolution, "(%d+)x+%d")), tonumber(match(E.resolution, "%d+x(%d+)"))
 E.isMacClient = IsMacClient()
 E.NewSign = "|TInterface\\OptionsFrame\\UI-OptionsFrame-NewFeatureIcon:14:14|t"
-E.InfoColor = "|cfffe7b2c"
+E.InfoColor = "|cffa855f7"
 
 --Tables
 E.media = {}
@@ -155,11 +155,11 @@ function E:ColorizedName(name, arg2)
 	for i = 1, length do
 		local letter = sub(name, i, i)
 		if i == 1 then
-			colorizedName = format("|cff1784d1%s", letter)
+			colorizedName = format("|cffa855f7%s", letter)
 		elseif i == 2 then
 			colorizedName = format("%s|r|cffe5e3e3%s", colorizedName, letter)
 		elseif i == length and arg2 then
-			colorizedName = format("%s%s|r|cff1784d1:|r", colorizedName, letter)
+			colorizedName = format("%s%s|r|cffa855f7:|r", colorizedName, letter)
 		else
 			colorizedName = colorizedName..letter
 		end
@@ -800,10 +800,10 @@ do
 				end
 			elseif message and (message > ver) then
 				if not E.recievedOutOfDateMessage then
-					E:Print(L["ElvUI is out of date. You can download the newest version from https://github.com/ElvUI-WotLK/ElvUI"])
+					-- E:Print(gsub(L["ElvUI is out of date. You can download the newest version from https://github.com/ElvUI-WotLK/ElvUI"], "https://github.com/ElvUI%-WotLK/ElvUI", "https://github.com/theshydubii/ElvUI"))
 
 					if message and ((message - ver) >= 0.01) and not InCombatLockdown() then
-						E:StaticPopup_Show("ELVUI_UPDATE_AVAILABLE")
+						-- E:StaticPopup_Show("ELVUI_UPDATE_AVAILABLE")
 					end
 
 					E.recievedOutOfDateMessage = true

@@ -469,7 +469,7 @@ E.Options.args.modulecontrol= {
 						header = {
 							order = 0,
 							type = "header",
-							name = L["Core |cff1784d1E|r|cffe5e3e3lvUI|r options."],
+							name = L["Core |cff6d28d9E|cff7c3aedl|cff8b5cf6v|cffa78bfaU|cffc4b5fdI|r options."],
 						},
 						actionbar = CreateActionbarsConfig(),
 						auras = CreateAurasConfig(),

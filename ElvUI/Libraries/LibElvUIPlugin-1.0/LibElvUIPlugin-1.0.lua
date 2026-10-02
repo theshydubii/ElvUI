@@ -93,6 +93,11 @@ elseif locale == "zhTW" then
 	LIBRARY = "庫"
 end
 
+local REPOSITORIES = {
+	ElvUI_Enhanced = "https://github.com/theshydubii/ElvUI_Enhanced/",
+	ElvUI_AddOnSkins = "https://github.com/theshydubii/ElvUI_AddOnSkins/"
+}
+
 local E
 local function checkElvUI()
 	if not E then
@@ -185,6 +190,7 @@ function lib:GetPluginOptions()
 		order = -10,
 		type = "group",
 		name = HDR_CONFIG,
+		hidden = true,
 		guiInline = false,
 		args = {
 			pluginheader = {
@@ -221,7 +227,12 @@ function lib:VersionCheck(event, prefix, message, _, sender)
 					if (ver and Pver) and (ver > Pver) then
 						plugin.old, plugin.newversion = true, version
 						local title = GetAddOnMetadata(plugin.name, "Title") or plugin.name
-						E:Print(format(MSG_OUTDATED, title, plugin.version, plugin.newversion))
+						local message = MSG_OUTDATED
+						local repository = REPOSITORIES[plugin.name]
+						if repository then
+							message = gsub(message, "https://github.com/ElvUI%-WotLK/ElvUI/", repository)
+						end
+						-- E:Print(format(message, title, plugin.version, plugin.newversion))
 						E.pluginRecievedOutOfDateMessage = true
 					end
 				end

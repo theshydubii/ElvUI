@@ -214,10 +214,10 @@ function E:CreateStatusFrame()
 	StatusFrame.Section4 = CreateSection(300, 60, StatusFrame, "TOP", StatusFrame.Section3, "BOTTOM", 0)
 
 	--Section headers
-	StatusFrame.Section1.Header.Text:SetText("|cfffe7b2cAddOn Info|r")
-	StatusFrame.Section2.Header.Text:SetText("|cfffe7b2cWoW Info|r")
-	StatusFrame.Section3.Header.Text:SetText("|cfffe7b2cCharacter Info|r")
-	StatusFrame.Section4.Header.Text:SetText("|cfffe7b2cExport To|r")
+	StatusFrame.Section1.Header.Text:SetText(E.InfoColor.."AddOn Info|r")
+	StatusFrame.Section2.Header.Text:SetText(E.InfoColor.."WoW Info|r")
+	StatusFrame.Section3.Header.Text:SetText(E.InfoColor.."Character Info|r")
+	StatusFrame.Section4.Header.Text:SetText(E.InfoColor.."Export To|r")
 
 	--Section content
 	StatusFrame.Section1.Content = CreateContentLines(4, StatusFrame.Section1, StatusFrame.Section1.Header)

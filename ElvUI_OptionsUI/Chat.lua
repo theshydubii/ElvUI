@@ -10,7 +10,7 @@ local tabSelectorTable = {}
 
 E.Options.args.chat = {
 	type = "group",
-	name = L["Chat"],
+	name = L["Chats"],
 	childGroups = "tab",
 	get = function(info) return E.db.chat[info[#info]] end,
 	set = function(info, value) E.db.chat[info[#info]] = value end,

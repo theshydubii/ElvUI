@@ -58,7 +58,7 @@ end
 
 E.Options.args.datatexts = {
 	type = "group",
-	name = L["DataTexts"],
+	name = L["Data Texts"],
 	childGroups = "tab",
 	get = function(info) return E.db.datatexts[info[#info]] end,
 	set = function(info, value) E.db.datatexts[info[#info]] = value DT:LoadDataTexts() end,

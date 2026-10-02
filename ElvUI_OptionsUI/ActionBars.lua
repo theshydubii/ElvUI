@@ -1113,7 +1113,7 @@ end
 local shamanOrder = E.myclass ~= "SHAMAN" and 1 or 0
 E.Options.args.actionbar = {
 	type = "group",
-	name = L["ActionBars"],
+	name = L["Action Bars"],
 	childGroups = "tree",
 	get = function(info) return E.db.actionbar[info[#info]] end,
 	set = function(info, value) E.db.actionbar[info[#info]] = value AB:UpdateButtonSettings() end,
