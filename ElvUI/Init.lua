@@ -48,12 +48,24 @@ local function GetOptionsWindowScale()
 	return settings and settings.separateOptionsWindowScale and settings.optionsWindowScale or OPTIONS_WINDOW_SCALE
 end
 
+local function UpdateGameTooltipScale()
+	local owner = GameTooltip:GetOwner()
+	local uiScale = UIParent:GetEffectiveScale()
+	local ownerScale = owner and owner:GetEffectiveScale() or uiScale
+	if uiScale and uiScale > 0 and ownerScale then
+		GameTooltip:SetScale(ownerScale / uiScale)
+	end
+end
+
+hooksecurefunc(GameTooltip, "SetOwner", UpdateGameTooltipScale)
+
 local function ScaleGameSettingsFrame(frame)
 	local frameName = frame and frame:GetName()
 	if frameName and gameSettingsFrameNames[frameName] then
 		local settings = AddOn.db and AddOn.db.general
 		local scale = settings and settings.separateGameMenuScale and settings.gameMenuScale or GAME_SETTINGS_SCALE
 		frame:SetScale(scale)
+		UpdateGameTooltipScale()
 	end
 end
 
@@ -318,6 +330,7 @@ function AddOn:UpdateConfigSize(reset)
 	local scale = GetOptionsWindowScale()
 	local maxWidth, maxHeight = self.UIParent:GetSize()
 	frame:SetScale(scale)
+	UpdateGameTooltipScale()
 	frame:SetMinResize(600, 500)
 	frame:SetMaxResize(maxWidth / scale - 50, maxHeight / scale - 50)
 
