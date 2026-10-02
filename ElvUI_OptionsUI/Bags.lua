@@ -265,6 +265,58 @@ E.Options.args.bags = {
 							values = C.Values.FontFlags
 						}
 					}
+				},
+					autoOpenClose = {
+						order = 18,
+						type = "group",
+						name = L["Bag Control"],
+						guiInline = true,
+						disabled = function() return not B.Initialized end,
+						args = {
+							enable = {
+								order = 1,
+								type = "toggle",
+								name = L["Enable"] .. " " .. L["Bag Control"],
+								get = function() return E.db.bags.autoOpenClose.enable end,
+								set = function(_, value) E.db.bags.autoOpenClose.enable = value end
+							},
+							open = {
+								order = 2,
+								type = "group",
+								name = L["Open bags when the following windows open:"],
+								guiInline = true,
+								get = function(info) return E.db.bags.autoOpenClose.open[info[#info]] end,
+								set = function(info, value) E.db.bags.autoOpenClose.open[info[#info]] = value end,
+								disabled = function() return not B.Initialized or not E.db.bags.autoOpenClose.enable end,
+								args = {
+									mail = {order = 1, type = "toggle", name = MINIMAP_TRACKING_MAILBOX},
+									vendor = {order = 2, type = "toggle", name = MERCHANT},
+									bank = {order = 3, type = "toggle", name = L["Bank"]},
+									guildBank = {order = 4, type = "toggle", name = GUILD_BANK},
+									auctionHouse = {order = 5, type = "toggle", name = BUTTON_LAG_AUCTIONHOUSE},
+									tradeSkills = {order = 6, type = "toggle", name = TRADESKILLS},
+									trade = {order = 7, type = "toggle", name = TRADE}
+								}
+							},
+							close = {
+								order = 3,
+								type = "group",
+								name = L["Close bags when the following windows close:"],
+								guiInline = true,
+								get = function(info) return E.db.bags.autoOpenClose.close[info[#info]] end,
+								set = function(info, value) E.db.bags.autoOpenClose.close[info[#info]] = value end,
+								disabled = function() return not B.Initialized or not E.db.bags.autoOpenClose.enable end,
+								args = {
+									mail = {order = 1, type = "toggle", name = MINIMAP_TRACKING_MAILBOX},
+									vendor = {order = 2, type = "toggle", name = MERCHANT},
+									bank = {order = 3, type = "toggle", name = L["Bank"]},
+									guildBank = {order = 4, type = "toggle", name = GUILD_BANK},
+									auctionHouse = {order = 5, type = "toggle", name = BUTTON_LAG_AUCTIONHOUSE},
+									tradeSkills = {order = 6, type = "toggle", name = TRADESKILLS},
+									trade = {order = 7, type = "toggle", name = TRADE}
+								}
+							}
+						}
 				}
 			}
 		},

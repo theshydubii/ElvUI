@@ -187,6 +187,27 @@ P.bags = {
 	countFontColor = {r = 1, g = 1, b = 1},
 	reverseSlots = false,
 	clearSearchOnClose = false,
+	autoOpenClose = {
+		enable = false,
+		open = {
+			mail = true,
+			vendor = true,
+			bank = true,
+			guildBank = true,
+			auctionHouse = true,
+			tradeSkills = true,
+			trade = true
+		},
+		close = {
+			mail = true,
+			vendor = true,
+			bank = true,
+			guildBank = true,
+			auctionHouse = true,
+			tradeSkills = true,
+			trade = true
+		}
+	},
 	disableBagSort = false,
 	disableBankSort = false,
 	strata = "DIALOG",

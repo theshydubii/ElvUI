@@ -70,6 +70,80 @@ local SEARCH = SEARCH
 
 local SEARCH_STRING = ""
 
+local BAG_CONTROL_OPEN_EVENTS = {
+	MAIL_SHOW = "mail",
+	MERCHANT_SHOW = "vendor",
+	GUILDBANKFRAME_OPENED = "guildBank",
+	AUCTION_HOUSE_SHOW = "auctionHouse",
+	TRADE_SKILL_SHOW = "tradeSkills",
+	TRADE_SHOW = "trade"
+}
+
+local BAG_CONTROL_CLOSE_EVENTS = {
+	MAIL_CLOSED = "mail",
+	GUILDBANKFRAME_CLOSED = "guildBank",
+	AUCTION_HOUSE_CLOSED = "auctionHouse",
+	TRADE_SKILL_CLOSE = "tradeSkills",
+	TRADE_CLOSED = "trade"
+}
+
+local BAG_CONTROL_LEGACY_KEYS = {
+	Mail = "mail",
+	Vendor = "vendor",
+	Bank = "bank",
+	GB = "guildBank",
+	AH = "auctionHouse",
+	TS = "tradeSkills",
+	Trade = "trade"
+}
+
+function B:MigrateBagControlSettings()
+	local legacy = E.db.BagControl
+	if not legacy or E.db.bags.autoOpenClose.migrated then return end
+
+	local settings = E.db.bags.autoOpenClose
+	if legacy.Enabled ~= nil then
+		settings.enable = legacy.Enabled
+	end
+
+	for legacyKey, settingKey in pairs(BAG_CONTROL_LEGACY_KEYS) do
+		if legacy.Open and legacy.Open[legacyKey] ~= nil then
+			settings.open[settingKey] = legacy.Open[legacyKey]
+		end
+		if legacy.Close and legacy.Close[legacyKey] ~= nil then
+			settings.close[settingKey] = legacy.Close[legacyKey]
+		end
+	end
+
+	settings.migrated = true
+end
+
+function B:HandleBagControlEvent(event)
+	if not B.Initialized then return end
+
+	local settings = E.db.bags.autoOpenClose
+	if not settings.enable then return end
+
+	local openKey = BAG_CONTROL_OPEN_EVENTS[event]
+	if openKey then
+		if settings.open[openKey] then
+			B:OpenBags()
+		else
+			B:CloseBags()
+		end
+		return
+	end
+
+	local closeKey = BAG_CONTROL_CLOSE_EVENTS[event]
+	if closeKey then
+		if settings.close[closeKey] then
+			B:CloseBags()
+		else
+			B:OpenBags()
+		end
+	end
+end
+
 function B:GetContainerFrame(arg)
 	if type(arg) == "boolean" and arg == true then
 		return B.BankFrame
@@ -1518,6 +1592,10 @@ function B:OpenBank()
 	B:UpdateTokens()
 
 	B.BankFrame:Show()
+	local settings = E.db.bags.autoOpenClose
+	if settings.enable and not settings.open.bank then
+		B.BagFrame:Hide()
+	end
 end
 
 function B:PLAYERBANKBAGSLOTS_CHANGED()
@@ -1533,6 +1611,10 @@ function B:CloseBank()
 
 	B.BankFrame:Hide()
 	B.BagFrame:Hide()
+	local settings = E.db.bags.autoOpenClose
+	if settings.enable and not settings.close.bank then
+		B:OpenBags()
+	end
 end
 
 function B:updateContainerFrameAnchors()
@@ -1647,6 +1729,7 @@ end
 
 function B:MERCHANT_CLOSED()
 	B.SellFrame:Hide()
+	B:HandleBagControlEvent("MERCHANT_CLOSED")
 end
 
 function B:ProgressQuickVendor()
@@ -1801,6 +1884,7 @@ function B:Initialize()
 
 	B.Initialized = true
 	B.db = E.db.bags
+	B:MigrateBagControlSettings()
 	B.BagFrames = {}
 	B.ProfessionColors = {
 		[0x0001] = {B.db.colors.profession.quiver.r, B.db.colors.profession.quiver.g, B.db.colors.profession.quiver.b},
@@ -1860,6 +1944,12 @@ function B:Initialize()
 	B:RegisterEvent("TRADE_MONEY_CHANGED", "UpdateGoldText")
 	B:RegisterEvent("BANKFRAME_OPENED", "OpenBank")
 	B:RegisterEvent("BANKFRAME_CLOSED", "CloseBank")
+	for event in pairs(BAG_CONTROL_OPEN_EVENTS) do
+		B:RegisterEvent(event, "HandleBagControlEvent")
+	end
+	for event in pairs(BAG_CONTROL_CLOSE_EVENTS) do
+		B:RegisterEvent(event, "HandleBagControlEvent")
+	end
 	B:RegisterEvent("PLAYERBANKBAGSLOTS_CHANGED")
 	B:RegisterEvent("GUILDBANKBAGSLOTS_CHANGED")
 end
