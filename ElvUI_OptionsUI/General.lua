@@ -82,56 +82,6 @@ E.Options.args.general = {
 					get = function(info) return E.global.general.ignoreScalePopup end,
 					set = function(info, value) E.global.general.ignoreScalePopup = value end
 				},
-				separateGameMenuScale = {
-					order = 5.5,
-					type = "toggle",
-					name = "Separate Game Menu Scale",
-					desc = "Use a custom scale for the Game Menu and Blizzard options instead of following the UI scale.",
-					get = function() return E.db.general.separateGameMenuScale end,
-					set = function(_, value)
-						E.db.general.separateGameMenuScale = value
-						E:UpdateGameSettingsScale()
-					end
-				},
-				gameMenuScale = {
-					order = 5.6,
-					type = "range",
-					name = "Game Menu and Options Scale",
-					desc = "Adjust the custom scale of the Game Menu and Blizzard options windows, including Macro and Key Bindings.",
-					min = 0.8, max = 1.5, step = 0.05,
-					disabled = function() return not E.db.general.separateGameMenuScale end,
-					get = function() return E.db.general.gameMenuScale end,
-					set = function(_, value)
-						E.db.general.gameMenuScale = value
-						E:UpdateGameSettingsScale()
-					end
-				},
-				separateOptionsWindowScale = {
-					order = 5.7,
-					type = "toggle",
-					name = "Separate ElvUI Options Scale",
-					desc = "Use a custom scale for the /elvui options window instead of following the UI scale.",
-					get = function() return E.db.general.separateOptionsWindowScale end,
-					set = function(_, value)
-						E.db.general.separateOptionsWindowScale = value
-						E:UpdateConfigSize()
-					end
-				},
-				optionsWindowScale = {
-					order = 5.8,
-					type = "range",
-					name = "ElvUI Options Scale",
-					desc = "Adjust the custom scale of the /elvui options window.",
-					min = 0.8, max = 1.5, step = 0.05,
-					disabled = function() return not E.db.general.separateOptionsWindowScale end,
-					get = function() return E.db.general.optionsWindowScale or 1 end,
-					set = function(_, value)
-						E.db.general.optionsWindowScale = value
-						if not IsMouseButtonDown("LeftButton") then
-							E:UpdateConfigSize()
-						end
-					end
-				},
 				pixelPerfect = {
 					order = 6,
 					type = "toggle",
@@ -810,4 +760,153 @@ E.Options.args.general = {
 			}
 		}
 	}
+}
+
+local scaleArgs = {
+	header = {
+		order = 1,
+		type = "description",
+		name = "Each group follows the Game Menu scale when enabled, or the overall UI scale otherwise."
+	},
+	gameMenu = {
+		order = 2,
+		type = "group",
+		name = "Game Menu",
+		guiInline = true,
+		args = {
+			enable = {
+				order = 1,
+				type = "toggle",
+				name = "Game Menu",
+				desc = "Use one custom scale for Game Menu, Interface, Audio, Video, Mac Options, Key Bindings, and Macros.",
+				get = function() return E.db.general.separateGameMenuScale end,
+				set = function(_, value)
+					E.db.general.separateGameMenuScale = value
+					E:UpdateGameSettingsScale()
+					E:UpdateConfigSize()
+				end
+			},
+			scale = {
+				order = 2,
+				type = "range",
+				name = "Scale",
+				min = 0.8, max = 1.5, step = 0.05,
+				disabled = function() return not E.db.general.separateGameMenuScale end,
+				get = function() return E.db.general.gameMenuScale or 1 end,
+				set = function(_, value)
+					E.db.general.gameMenuScale = value
+					if not IsMouseButtonDown("LeftButton") then
+						E:UpdateGameSettingsScale()
+						E:UpdateConfigSize()
+					end
+				end
+			}
+		}
+	},
+	elvUIOptions = {
+		order = 3,
+		type = "group",
+		name = "ElvUI Options",
+		guiInline = true,
+		args = {
+			enable = {
+				order = 1,
+				type = "toggle",
+				name = "ElvUI Options",
+				desc = "Use a custom scale for the /elvui options window instead of inheriting the Game Menu or UI scale.",
+				get = function() return E.db.general.separateOptionsWindowScale end,
+				set = function(_, value)
+					E.db.general.separateOptionsWindowScale = value
+					E:UpdateConfigSize()
+				end
+			},
+			scale = {
+				order = 2,
+				type = "range",
+				name = "Scale",
+				min = 0.8, max = 1.5, step = 0.05,
+				disabled = function() return not E.db.general.separateOptionsWindowScale end,
+				get = function() return E.db.general.optionsWindowScale or 1 end,
+				set = function(_, value)
+					E.db.general.optionsWindowScale = value
+					if not IsMouseButtonDown("LeftButton") then E:UpdateConfigSize() end
+				end
+			}
+		}
+	},
+	charactersUI = {
+		order = 4,
+		type = "group",
+		name = "Characters UI",
+		guiInline = true,
+		args = {
+			enable = {
+				order = 1,
+				type = "toggle",
+				name = "Characters UI",
+				desc = "Use one custom scale for Talents, Achievements, Character Info, Spell Book, Social, Player vs. Player, and Group Finder.",
+				get = function() return E.db.general.separateCharactersUIScale end,
+				set = function(_, value)
+					E.db.general.separateCharactersUIScale = value
+					E:UpdateGameSettingsScale()
+				end
+			},
+			scale = {
+				order = 2,
+				type = "range",
+				name = "Scale",
+				min = 0.8, max = 1.5, step = 0.05,
+				disabled = function() return not E.db.general.separateCharactersUIScale end,
+				get = function() return E.db.general.charactersUIScale or 1 end,
+				set = function(_, value)
+					E.db.general.charactersUIScale = value
+					if not IsMouseButtonDown("LeftButton") then E:UpdateGameSettingsScale() end
+				end
+			}
+		}
+	}
+}
+
+local function AddWindowScaleOptions(groupArgs, option, order)
+	groupArgs[option.enabledKey] = {
+		order = order,
+		type = "toggle",
+		name = option.name,
+		desc = "Use an independent scale for this window instead of inheriting its group scale.",
+		get = function() return E.db.general[option.enabledKey] end,
+		set = function(_, value)
+			E.db.general[option.enabledKey] = value
+			E:UpdateGameSettingsScale()
+		end
+	}
+	groupArgs[option.scaleKey] = {
+		order = order + 1,
+		type = "range",
+		name = option.name.." Scale",
+		min = 0.8, max = 1.5, step = 0.05,
+		disabled = function() return not E.db.general[option.enabledKey] end,
+		get = function() return E.db.general[option.scaleKey] or 1 end,
+		set = function(_, value)
+			E.db.general[option.scaleKey] = value
+			if not IsMouseButtonDown("LeftButton") then E:UpdateGameSettingsScale() end
+		end
+	}
+end
+
+local gameMenuOrder, charactersOrder = 4, 4
+for _, option in ipairs(E.GameSettingsScaleOptions) do
+	if option.group == "gameMenu" then
+		AddWindowScaleOptions(scaleArgs.gameMenu.args, option, gameMenuOrder)
+		gameMenuOrder = gameMenuOrder + 2
+	else
+		AddWindowScaleOptions(scaleArgs.charactersUI.args, option, charactersOrder)
+		charactersOrder = charactersOrder + 2
+	end
+end
+
+E.Options.args.general.args.scale = {
+	order = 10,
+	type = "group",
+	name = L["Scale"],
+	args = scaleArgs
 }

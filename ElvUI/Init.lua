@@ -33,19 +33,51 @@ local AddOnName, Engine = ...
 local AddOn = AceAddon:NewAddon(AddOnName, "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0", "AceHook-3.0")
 local OPTIONS_WINDOW_SCALE = 1
 local GAME_SETTINGS_SCALE = 1
+local gameSettingsScaleOptions = {
+	{frame = "InterfaceOptionsFrame", key = "interface", name = "Interface", group = "gameMenu"},
+	{frame = "AudioOptionsFrame", key = "audio", name = "Audio", group = "gameMenu"},
+	{frame = "VideoOptionsFrame", key = "video", name = "Video", group = "gameMenu"},
+	{frame = "MacOptionsFrame", key = "macOptions", name = "Mac Options", group = "gameMenu"},
+	{frame = "KeyBindingFrame", key = "keybindings", name = "Key Bindings", group = "gameMenu"},
+	{frame = "MacroFrame", key = "macros", name = "Macros", group = "gameMenu"},
+	{frame = "PlayerTalentFrame", key = "talents", name = "Talents", group = "characters"},
+	{frame = "AchievementFrame", key = "achievements", name = "Achievements", group = "characters"},
+	{frame = "CharacterFrame", key = "characterInfo", name = "Character Info", group = "characters"},
+	{frame = "SpellBookFrame", key = "spellBook", name = "Spell Book", group = "characters"},
+	{frame = "FriendsFrame", key = "social", name = "Social", group = "characters"},
+	{frame = "PVPFrame", key = "pvp", name = "Player vs. Player", group = "characters"},
+	{frame = "LFDParentFrame", key = "groupFinder", name = "Group Finder", group = "characters"}
+}
+AddOn.GameSettingsScaleOptions = gameSettingsScaleOptions
+
 local gameSettingsFrameNames = {
 	GameMenuFrame = true,
-	InterfaceOptionsFrame = true,
-	AudioOptionsFrame = true,
-	VideoOptionsFrame = true,
-	KeyBindingFrame = true,
-	MacroFrame = true,
-	MacOptionsFrame = true
 }
+local gameSettingsScaleByFrame = {}
+for _, option in ipairs(gameSettingsScaleOptions) do
+	gameSettingsFrameNames[option.frame] = true
+	option.enabledKey = "separate"..option.key:sub(1, 1):upper()..option.key:sub(2).."Scale"
+	option.scaleKey = option.key.."Scale"
+	gameSettingsScaleByFrame[option.frame] = option
+end
+
+local function GetGameMenuScale()
+	local settings = AddOn.db and AddOn.db.general
+	return settings and settings.separateGameMenuScale and settings.gameMenuScale or GAME_SETTINGS_SCALE
+end
+
+local function GetCharactersUIScale()
+	local settings = AddOn.db and AddOn.db.general
+	return settings and settings.separateCharactersUIScale and settings.charactersUIScale or GetGameMenuScale()
+end
 
 local function GetOptionsWindowScale()
 	local settings = AddOn.db and AddOn.db.general
-	return settings and settings.separateOptionsWindowScale and settings.optionsWindowScale or OPTIONS_WINDOW_SCALE
+	if settings and settings.separateOptionsWindowScale then
+		return settings.optionsWindowScale or OPTIONS_WINDOW_SCALE
+	end
+
+	return GetGameMenuScale()
 end
 
 local function UpdateGameTooltipScale()
@@ -62,8 +94,12 @@ hooksecurefunc(GameTooltip, "SetOwner", UpdateGameTooltipScale)
 local function ScaleGameSettingsFrame(frame)
 	local frameName = frame and frame:GetName()
 	if frameName and gameSettingsFrameNames[frameName] then
+		local option = gameSettingsScaleByFrame[frameName]
+		local scale = (option and option.group == "characters") and GetCharactersUIScale() or GetGameMenuScale()
 		local settings = AddOn.db and AddOn.db.general
-		local scale = settings and settings.separateGameMenuScale and settings.gameMenuScale or GAME_SETTINGS_SCALE
+		if option and settings and settings[option.enabledKey] then
+			scale = settings[option.scaleKey] or scale
+		end
 		frame:SetScale(scale)
 		UpdateGameTooltipScale()
 	end
