@@ -863,6 +863,8 @@ function E:UpdateAll(ignoreInstall)
 	E:UpdateFrameTemplates()
 	E:UpdateStatusBars()
 	E:UpdateCooldownSettings("all")
+	E:UpdateGameSettingsScale()
+	E:UpdateConfigSize()
 
 	Layout:ToggleChatPanels()
 	Layout:BottomPanelVisibility()

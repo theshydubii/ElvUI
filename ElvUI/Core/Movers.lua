@@ -379,13 +379,29 @@ end
 
 function E:ToggleMovers(show, moverType)
 	self.configMode = show
+	self.configMoverType = moverType
 
 	for name, holder in pairs(E.CreatedMovers) do
-		if show and holder.type[moverType] then
+		if show and holder.type[moverType] and not holder.hidden then
 			_G[name]:Show()
 		else
 			_G[name]:Hide()
 		end
+	end
+end
+
+function E:SetMoverHidden(name, hidden)
+	local holder = E.CreatedMovers[name]
+	if not holder then return end
+
+	holder.hidden = hidden
+	local mover = holder.mover
+	if not mover then return end
+
+	if hidden or not self.configMode or not holder.type[self.configMoverType] then
+		mover:Hide()
+	else
+		mover:Show()
 	end
 end
 

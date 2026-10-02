@@ -216,17 +216,13 @@ function TT:SetUnitText(tt, unit, level, isShiftKeyDown)
 	local color
 	if UnitIsPlayer(unit) then
 		local localeClass, class = UnitClass(unit)
-		if not localeClass or not class then return end
-
 		local name, realm = UnitName(unit)
 		local guildName, guildRankName = GetGuildInfo(unit)
 		local pvpName = UnitPVPName(unit)
+		local title = _G[tt:GetName().."TextLeft1"]
+		name = name or (title and title:GetText()) or UNKNOWN
 
-		color = CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[class] or RAID_CLASS_COLORS[class]
-
-		if not color then
-			color = RAID_CLASS_COLORS.PRIEST
-		end
+		color = (class and CUSTOM_CLASS_COLORS and CUSTOM_CLASS_COLORS[class]) or (class and RAID_CLASS_COLORS[class]) or RAID_CLASS_COLORS.PRIEST
 
 		if self.db.playerTitles and pvpName then
 			name = pvpName
@@ -263,7 +259,7 @@ function TT:SetUnitText(tt, unit, level, isShiftKeyDown)
 		if levelLine then
 			local diffColor = GetQuestDifficultyColor(level)
 			local race = UnitRace(unit)
-			levelLine:SetFormattedText("|cff%02x%02x%02x%s|r %s %s%s|r", diffColor.r * 255, diffColor.g * 255, diffColor.b * 255, level > 0 and level or "??", race or "", E:RGBToHex(color.r, color.g, color.b), localeClass)
+			levelLine:SetFormattedText("|cff%02x%02x%02x%s|r %s %s%s|r", diffColor.r * 255, diffColor.g * 255, diffColor.b * 255, level > 0 and level or "??", race or "", E:RGBToHex(color.r, color.g, color.b), localeClass or class or "")
 		end
 	else
 		if UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit) then
@@ -383,7 +379,10 @@ function TT:GameTooltip_OnTooltipSetUnit(tt)
 			unit = GMF:GetAttribute("unit")
 		end
 
-		if not unit or not UnitExists(unit) then return end
+		if not unit or not UnitExists(unit) then
+			tt:Hide()
+			return
+		end
 	end
 
 	self:RemoveTrashLines(tt)

@@ -31,6 +31,39 @@ local CallbackHandler = LibStub("CallbackHandler-1.0")
 
 local AddOnName, Engine = ...
 local AddOn = AceAddon:NewAddon(AddOnName, "AceConsole-3.0", "AceEvent-3.0", "AceTimer-3.0", "AceHook-3.0")
+local OPTIONS_WINDOW_SCALE = 1
+local GAME_SETTINGS_SCALE = 1
+local gameSettingsFrameNames = {
+	GameMenuFrame = true,
+	InterfaceOptionsFrame = true,
+	AudioOptionsFrame = true,
+	VideoOptionsFrame = true,
+	KeyBindingFrame = true,
+	MacroFrame = true,
+	MacOptionsFrame = true
+}
+
+local function GetOptionsWindowScale()
+	local settings = AddOn.db and AddOn.db.general
+	return settings and settings.separateOptionsWindowScale and settings.optionsWindowScale or OPTIONS_WINDOW_SCALE
+end
+
+local function ScaleGameSettingsFrame(frame)
+	local frameName = frame and frame:GetName()
+	if frameName and gameSettingsFrameNames[frameName] then
+		local settings = AddOn.db and AddOn.db.general
+		local scale = settings and settings.separateGameMenuScale and settings.gameMenuScale or GAME_SETTINGS_SCALE
+		frame:SetScale(scale)
+	end
+end
+
+function AddOn:UpdateGameSettingsScale()
+	for frameName in pairs(gameSettingsFrameNames) do
+		ScaleGameSettingsFrame(_G[frameName])
+	end
+end
+
+hooksecurefunc("ShowUIPanel", ScaleGameSettingsFrame)
 AddOn.callbacks = AddOn.callbacks or CallbackHandler:New(AddOn)
 AddOn.DF = {profile = {}, global = {}}; AddOn.privateVars = {profile = {}} -- Defaults
 AddOn.Options = {type = "group", name = AddOnName, args = {}}
@@ -210,6 +243,7 @@ LoadUI:RegisterEvent("PLAYER_LOGIN")
 LoadUI:SetScript("OnEvent", function()
 	AddOn.Masque = AddOn.Masque or LibStub("Masque", true)
 	AddOn:Initialize()
+	AddOn:UpdateGameSettingsScale()
 end)
 
 function AddOn:PLAYER_REGEN_ENABLED()
@@ -281,9 +315,11 @@ function AddOn:UpdateConfigSize(reset)
 	local frame = self.GUIFrame
 	if not frame then return end
 
+	local scale = GetOptionsWindowScale()
 	local maxWidth, maxHeight = self.UIParent:GetSize()
+	frame:SetScale(scale)
 	frame:SetMinResize(600, 500)
-	frame:SetMaxResize(maxWidth-50, maxHeight-50)
+	frame:SetMaxResize(maxWidth / scale - 50, maxHeight / scale - 50)
 
 	self.Libs.AceConfigDialog:SetDefaultSize(AddOnName, self:GetConfigDefaultSize())
 
@@ -310,7 +346,8 @@ end
 function AddOn:GetConfigDefaultSize()
 	local width, height = AddOn:GetConfigSize()
 	local maxWidth, maxHeight = AddOn.UIParent:GetSize()
-	width, height = min(maxWidth - 50, width), min(maxHeight - 50, height)
+	local scale = GetOptionsWindowScale()
+	width, height = min(maxWidth / scale - 50, width), min(maxHeight / scale - 50, height)
 	return width, height
 end
 

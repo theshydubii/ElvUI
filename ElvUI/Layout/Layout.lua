@@ -212,6 +212,17 @@ function LO:ToggleChatPanels()
 	LeftChatDataPanel:ClearAllPoints()
 	RightChatDataPanel:ClearAllPoints()
 
+	for _, panel in ipairs({LeftChatPanel, RightChatPanel}) do
+		local backdrop = panel.backdrop
+		if E.db.chat.hidePanelBorders then
+			backdrop:SetBackdropBorderColor(0, 0, 0, 0)
+			if backdrop.iborder then backdrop.iborder:Hide() end
+			if backdrop.oborder then backdrop.oborder:Hide() end
+		else
+			backdrop:SetTemplate("Transparent")
+		end
+	end
+
 	local SPACING = E.Border*3 - E.Spacing
 	local SIDE_BUTTON_SPACING = (E.PixelMode and E.Border*4) or SPACING*2
 
@@ -273,6 +284,34 @@ function LO:ToggleChatPanels()
 		RightChatToggleButton:Point("BOTTOMRIGHT", RightChatPanel, "BOTTOMRIGHT", -SPACING, SPACING)
 		LO:ToggleChatTabPanels(nil, true)
 	end
+
+	local hideLeftPanel = panelBackdrop == "RIGHT"
+	local hideRightPanel = panelBackdrop == "LEFT"
+	if hideLeftPanel then
+		LeftChatPanel:Hide()
+		LeftChatToggleButton:Hide()
+	else
+		LeftChatPanel:Show()
+		if E.db.datatexts.leftChatPanel then
+			LeftChatToggleButton:Show()
+		else
+			LeftChatToggleButton:Hide()
+		end
+	end
+	if hideRightPanel then
+		RightChatPanel:Hide()
+		RightChatToggleButton:Hide()
+	else
+		RightChatPanel:Show()
+		if E.db.datatexts.rightChatPanel then
+			RightChatToggleButton:Show()
+		else
+			RightChatToggleButton:Hide()
+		end
+	end
+
+	E:SetMoverHidden("LeftChatMover", hideLeftPanel)
+	E:SetMoverHidden("RightChatMover", hideRightPanel)
 end
 
 function LO:CreateChatPanels()

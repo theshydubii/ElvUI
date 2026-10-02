@@ -645,8 +645,18 @@ E.Options.args.chat = {
 					end,
 					min = 50, max = 1000, step = 1
 				},
-				panelColor = {
+				hidePanelBorders = {
 					order = 10,
+					type = "toggle",
+					name = "Hide Panel Borders",
+					desc = "Hide the borders around both chat panels while keeping their backgrounds visible.",
+					set = function(info, value)
+						E.db.chat.hidePanelBorders = value
+						Layout:ToggleChatPanels()
+					end
+				},
+				panelColor = {
+					order = 11,
 					type = "color",
 					name = L["Backdrop Color"],
 					hasAlpha = true,
@@ -662,12 +672,12 @@ E.Options.args.chat = {
 					end
 				},
 				spacer2 = {
-					order = 11,
+					order = 12,
 					type = "description",
 					name = ""
 				},
 				panelHeightRight = {
-					order = 12,
+					order = 13,
 					type = "range",
 					name = L["Right Panel Height"],
 					desc = L["Adjust the height of your right chat panel."],
@@ -677,7 +687,7 @@ E.Options.args.chat = {
 					min = 50, max = 600, step = 1
 				},
 				panelWidthRight = {
-					order = 13,
+					order = 14,
 					type = "range",
 					name = L["Right Panel Width"],
 					desc = L["Adjust the width of your right chat panel."],
@@ -691,7 +701,7 @@ E.Options.args.chat = {
 					min = 50, max = 1000, step = 1
 				},
 				panelBackdropNameLeft = {
-					order = 14,
+					order = 15,
 					type = "input",
 					width = "full",
 					name = L["Panel Texture (Left)"],
@@ -702,7 +712,7 @@ E.Options.args.chat = {
 					end
 				},
 				panelBackdropNameRight = {
-					order = 15,
+					order = 16,
 					type = "input",
 					width = "full",
 					name = L["Panel Texture (Right)"],

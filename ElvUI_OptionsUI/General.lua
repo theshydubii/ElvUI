@@ -8,6 +8,7 @@ local Threat = E:GetModule("Threat")
 local AFK = E:GetModule("AFK")
 
 local _G = _G
+local IsMouseButtonDown = IsMouseButtonDown
 
 local FCF_GetNumActiveChatFrames = FCF_GetNumActiveChatFrames
 
@@ -80,6 +81,56 @@ E.Options.args.general = {
 					desc = L["This will prevent the UI Scale Popup from being shown when changing the game window size."],
 					get = function(info) return E.global.general.ignoreScalePopup end,
 					set = function(info, value) E.global.general.ignoreScalePopup = value end
+				},
+				separateGameMenuScale = {
+					order = 5.5,
+					type = "toggle",
+					name = "Separate Game Menu Scale",
+					desc = "Use a custom scale for the Game Menu and Blizzard options instead of following the UI scale.",
+					get = function() return E.db.general.separateGameMenuScale end,
+					set = function(_, value)
+						E.db.general.separateGameMenuScale = value
+						E:UpdateGameSettingsScale()
+					end
+				},
+				gameMenuScale = {
+					order = 5.6,
+					type = "range",
+					name = "Game Menu and Options Scale",
+					desc = "Adjust the custom scale of the Game Menu and Blizzard options windows, including Macro and Key Bindings.",
+					min = 0.8, max = 1.5, step = 0.05,
+					disabled = function() return not E.db.general.separateGameMenuScale end,
+					get = function() return E.db.general.gameMenuScale end,
+					set = function(_, value)
+						E.db.general.gameMenuScale = value
+						E:UpdateGameSettingsScale()
+					end
+				},
+				separateOptionsWindowScale = {
+					order = 5.7,
+					type = "toggle",
+					name = "Separate ElvUI Options Scale",
+					desc = "Use a custom scale for the /elvui options window instead of following the UI scale.",
+					get = function() return E.db.general.separateOptionsWindowScale end,
+					set = function(_, value)
+						E.db.general.separateOptionsWindowScale = value
+						E:UpdateConfigSize()
+					end
+				},
+				optionsWindowScale = {
+					order = 5.8,
+					type = "range",
+					name = "ElvUI Options Scale",
+					desc = "Adjust the custom scale of the /elvui options window.",
+					min = 0.8, max = 1.5, step = 0.05,
+					disabled = function() return not E.db.general.separateOptionsWindowScale end,
+					get = function() return E.db.general.optionsWindowScale or 1 end,
+					set = function(_, value)
+						E.db.general.optionsWindowScale = value
+						if not IsMouseButtonDown("LeftButton") then
+							E:UpdateConfigSize()
+						end
+					end
 				},
 				pixelPerfect = {
 					order = 6,
