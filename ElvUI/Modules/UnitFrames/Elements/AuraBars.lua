@@ -1,5 +1,6 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local UF = E:GetModule("UnitFrames")
+UF.AuraBarsMoversIntegrated = true
 
 --Lua functions
 local tostring, select = tostring, select
@@ -13,6 +14,58 @@ local UnitIsFriend = UnitIsFriend
 local UnitIsUnit = UnitIsUnit
 local UnitCanAttack = UnitCanAttack
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
+
+local AURA_BAR_MOVERS = {
+	player = {name = "ElvUF_PlayerAuraMover", text = "Player Aura Bars"},
+	target = {name = "ElvUF_TargetAuraMover", text = "Target Aura Bars"},
+	focus = {name = "ElvUF_FocusAuraMover", text = "Focus Aura Bars"},
+	pet = {name = "ElvUF_PetAuraMover", text = "Pet Aura Bars"}
+}
+
+local function MigrateAuraBarMoverSettings()
+	local legacy = E.db.abm
+	if not legacy or legacy.migrated then return end
+
+	for unit in pairs(AURA_BAR_MOVERS) do
+		if legacy[unit] ~= nil then
+			local auraBar = E.db.unitframe.units[unit].aurabar
+			auraBar.detachFromFrame = legacy[unit]
+			auraBar.detachedWidth = legacy[unit .. "w"] or E.db.unitframe.units[unit].width
+			auraBar.detachedSpacing = legacy[unit .. "Space"] or 0
+		end
+	end
+
+	legacy.migrated = true
+end
+
+local function ConfigureAuraBarMover(frame, auraBarDB)
+	local moverInfo = AURA_BAR_MOVERS[frame.unit]
+	if not moverInfo then return end
+
+	local name = moverInfo.name
+	local detached = auraBarDB.enable and auraBarDB.detachFromFrame
+	local holder = frame.AuraBars.Holder
+
+	if detached and not holder then
+		holder = CreateFrame("Frame", nil, frame.AuraBars)
+		holder:Point("BOTTOM", frame, "TOP", 0, 0)
+		holder:SetSize(auraBarDB.detachedWidth or frame:GetWidth(), 20)
+		frame.AuraBars.Holder = holder
+		E:CreateMover(holder, name, L[moverInfo.text], nil, nil, nil, "ALL,SOLO")
+	elseif detached then
+		holder:SetSize(auraBarDB.detachedWidth or frame:GetWidth(), 20)
+	end
+
+	if detached then
+		if E.DisabledMovers[name] then
+			E:EnableMover(name)
+		end
+	elseif E.CreatedMovers[name] then
+		E:DisableMover(name)
+	end
+
+	return detached and holder
+end
 
 local function OnClick(self)
 	local mod = E.db.unitframe.auraBlacklistModifier
@@ -74,6 +127,8 @@ function UF:Configure_AuraBars(frame)
 
 	local auraBars = frame.AuraBars
 	local db = frame.db
+	MigrateAuraBarMoverSettings()
+	local moverHolder = ConfigureAuraBarMover(frame, db.aurabar)
 	if db.aurabar.enable then
 		if not frame:IsElementEnabled("AuraBars") then
 			frame:EnableElement("AuraBars")
@@ -124,8 +179,13 @@ function UF:Configure_AuraBars(frame)
 
 		auraBars.auraBarHeight = db.aurabar.height
 		auraBars:ClearAllPoints()
-		auraBars:Point(anchorPoint.."LEFT", attachTo, anchorTo.."LEFT", offsetLeft, yOffset)
-		auraBars:Point(anchorPoint.."RIGHT", attachTo, anchorTo.."RIGHT", offsetRight, yOffset)
+		if moverHolder then
+			auraBars:Point(anchorPoint.."LEFT", moverHolder, anchorTo.."LEFT", 0, 0)
+			auraBars:Point(anchorPoint.."RIGHT", moverHolder, anchorTo.."RIGHT", 0, 0)
+		else
+			auraBars:Point(anchorPoint.."LEFT", attachTo, anchorTo.."LEFT", offsetLeft, yOffset)
+			auraBars:Point(anchorPoint.."RIGHT", attachTo, anchorTo.."RIGHT", offsetRight, yOffset)
+		end
 		auraBars.buffColor = {buffColor.r, buffColor.g, buffColor.b}
 		if UF.db.colors.auraBarByType then
 			auraBars.debuffColor = nil
@@ -152,7 +212,11 @@ function UF:Configure_AuraBars(frame)
 
 		auraBars.maxBars = db.aurabar.maxBars
 		auraBars.forceShow = frame.forceShowAuras
-		auraBars.spacing = ((-frame.BORDER + frame.SPACING*3) + db.aurabar.spacing)
+		if moverHolder then
+			auraBars.spacing = (E.PixelMode and -1 or 1) + (db.aurabar.detachedSpacing or 0)
+		else
+			auraBars.spacing = ((-frame.BORDER + frame.SPACING*3) + db.aurabar.spacing)
+		end
 		auraBars:SetAnchors()
 	else
 		if frame:IsElementEnabled("AuraBars") then

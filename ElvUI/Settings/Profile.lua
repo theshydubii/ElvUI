@@ -1594,7 +1594,10 @@ P.unitframe = {
 				sort = "TIME_REMAINING",
 				uniformThreshold = 0,
 				yOffset = 0,
-				spacing = 0
+				spacing = 0,
+				detachFromFrame = false,
+				detachedWidth = 250,
+				detachedSpacing = 0
 			},
 			raidicon = {
 				enable = true,
@@ -1796,7 +1799,10 @@ P.unitframe = {
 				sort = "TIME_REMAINING",
 				uniformThreshold = 0,
 				yOffset = 0,
-				spacing = 0
+				spacing = 0,
+				detachFromFrame = false,
+				detachedWidth = 250,
+				detachedSpacing = 0
 			},
 			raidicon = {
 				enable = true,
@@ -2221,7 +2227,10 @@ P.unitframe = {
 				sort = "TIME_REMAINING",
 				uniformThreshold = 0,
 				yOffset = 0,
-				spacing = 0
+				spacing = 0,
+				detachFromFrame = false,
+				detachedWidth = 250,
+				detachedSpacing = 0
 			},
 			raidicon = {
 				enable = true,
@@ -2501,7 +2510,10 @@ P.unitframe = {
 				sort = "TIME_REMAINING",
 				uniformThreshold = 0,
 				yOffset = 2,
-				spacing = 2
+				spacing = 2,
+				detachFromFrame = false,
+				detachedWidth = 250,
+				detachedSpacing = 0
 			},
 			buffIndicator = {
 				enable = true,
