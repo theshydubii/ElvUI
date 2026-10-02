@@ -1553,6 +1553,81 @@ local function GetOptionsTable_Castbar(hasTicks, updateFunc, groupName, numUnits
 		}
 	}
 
+	config.args.overlayGroup = {
+		order = 15,
+		type = "group",
+		name = L["Overlay"],
+		guiInline = true,
+		hidden = function() return groupName ~= "player" and groupName ~= "target" and groupName ~= "focus" and groupName ~= "pet" and groupName ~= "boss" and groupName ~= "arena" end,
+		get = function(info) return E.db.unitframe.units[groupName].castbar[info[#info]] end,
+		set = function(info, value)
+			local castbar = E.db.unitframe.units[groupName].castbar
+			if info[#info] == "overlayOnFrame" and value == "POWER" and not E.db.unitframe.units[groupName].power.enable then
+				value = "HEALTH"
+			end
+			castbar[info[#info]] = value
+			updateFunc(UF, groupName, numUnits)
+		end,
+		args = {
+			overlay = {
+				order = 1,
+				type = "toggle",
+				name = L["Enable Overlay"],
+				desc = L["Overlay the castbar on the chosen panel."],
+				disabled = function() return not E.db.unitframe.units[groupName].castbar.enable end
+			},
+			overlayOnFrame = {
+				order = 2,
+				type = "select",
+				name = L["Overlay Panel"],
+				desc = L["Choose which panel to overlay the castbar on."],
+				values = {POWER = L["Power"], HEALTH = L["Health"]},
+				get = function()
+					local castbar = E.db.unitframe.units[groupName].castbar
+					if castbar.overlayOnFrame == "POWER" and not E.db.unitframe.units[groupName].power.enable then
+						return "HEALTH"
+					end
+					return castbar.overlayOnFrame
+				end,
+				disabled = function() return not E.db.unitframe.units[groupName].castbar.enable or not E.db.unitframe.units[groupName].castbar.overlay end
+			},
+			overlayHideText = {
+				order = 3,
+				type = "toggle",
+				name = L["Hide Text"],
+				disabled = function() return not E.db.unitframe.units[groupName].castbar.enable or not E.db.unitframe.units[groupName].castbar.overlay end
+			},
+			overlayTextXOffset = {
+				order = 4,
+				type = "range",
+				name = L["Text"] .. " " .. L["X-Offset"],
+				min = -100, max = 100, step = 1,
+				disabled = function() local db = E.db.unitframe.units[groupName].castbar return not db.enable or not db.overlay or db.overlayHideText end
+			},
+			overlayTextYOffset = {
+				order = 5,
+				type = "range",
+				name = L["Text"] .. " " .. L["Y-Offset"],
+				min = -50, max = 50, step = 1,
+				disabled = function() local db = E.db.unitframe.units[groupName].castbar return not db.enable or not db.overlay or db.overlayHideText end
+			},
+			overlayTimeXOffset = {
+				order = 6,
+				type = "range",
+				name = L["Time"] .. " " .. L["X-Offset"],
+				min = -100, max = 100, step = 1,
+				disabled = function() local db = E.db.unitframe.units[groupName].castbar return not db.enable or not db.overlay or db.overlayHideText end
+			},
+			overlayTimeYOffset = {
+				order = 7,
+				type = "range",
+				name = L["Time"] .. " " .. L["Y-Offset"],
+				min = -50, max = 50, step = 1,
+				disabled = function() local db = E.db.unitframe.units[groupName].castbar return not db.enable or not db.overlay or db.overlayHideText end
+			}
+		}
+	}
+
 	if hasTicks then
 		config.args.displayTarget = {
 			order = 11,

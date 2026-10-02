@@ -1,5 +1,6 @@
 local E, L, V, P, G = unpack(select(2, ...)); --Import: Engine, Locales, PrivateDB, ProfileDB, GlobalDB
 local UF = E:GetModule("UnitFrames")
+UF.CastBarOverlayIntegrated = true
 
 --Lua functions
 local unpack = unpack
@@ -26,6 +27,96 @@ local INVERT_ANCHORPOINT = {
 	TOP = "BOTTOM",
 	BOTTOM = "TOP"
 }
+
+local CASTBAR_OVERLAY_UNITS = {
+	player = true,
+	target = true,
+	focus = true,
+	pet = true,
+	boss = true,
+	arena = true
+}
+
+local function MigrateCastbarOverlaySettings()
+	local legacy = E.db.CBO
+	if not legacy or legacy.migrated then return end
+
+	for unit in pairs(CASTBAR_OVERLAY_UNITS) do
+		local oldSettings = legacy[unit]
+		if oldSettings then
+			local castbar = E.db.unitframe.units[unit].castbar
+			castbar.overlay = oldSettings.overlay
+			castbar.overlayOnFrame = oldSettings.overlayOnFrame or castbar.overlayOnFrame
+			castbar.overlayHideText = oldSettings.hidetext
+			castbar.overlayTextXOffset = oldSettings.xOffsetText or castbar.overlayTextXOffset
+			castbar.overlayTextYOffset = oldSettings.yOffsetText or castbar.overlayTextYOffset
+			castbar.overlayTimeXOffset = oldSettings.xOffsetTime or castbar.overlayTimeXOffset
+			castbar.overlayTimeYOffset = oldSettings.yOffsetTime or castbar.overlayTimeYOffset
+		end
+	end
+
+	legacy.migrated = true
+end
+
+local function ConfigureCastbarOverlay(frame, castbar, db)
+	if not CASTBAR_OVERLAY_UNITS[frame.unitframeType] or not db.overlay then return end
+
+	local overlayOnFrame = db.overlayOnFrame
+	if overlayOnFrame == "POWER" and not frame.db.power.enable then
+		overlayOnFrame = "HEALTH"
+	end
+
+	local overlayFrame = overlayOnFrame == "HEALTH" and frame.Health or frame.Power
+	if not overlayFrame then return end
+
+	castbar.origFrameStrata = castbar:GetFrameStrata()
+	castbar.origFrameLevel = castbar:GetFrameLevel()
+	local strataFrame = overlayOnFrame == "HEALTH" and frame.RaisedElementParent or overlayFrame
+	castbar:SetFrameStrata(strataFrame:GetFrameStrata())
+	castbar:SetFrameLevel(strataFrame:GetFrameLevel() + 2)
+
+	local overlayHeight = overlayFrame:GetHeight()
+	castbar:ClearAllPoints()
+	if not db.iconAttached then
+		castbar:SetInside(overlayFrame, 0, 0)
+	else
+		castbar.ButtonIcon.bg:Size(overlayHeight + frame.BORDER*2)
+		local iconWidth = db.icon and (castbar.ButtonIcon.bg:GetWidth() - frame.BORDER) or 0
+		if frame.ORIENTATION == "RIGHT" then
+			castbar:SetPoint("TOPLEFT", overlayFrame, "TOPLEFT")
+			castbar:SetPoint("BOTTOMRIGHT", overlayFrame, "BOTTOMRIGHT", -iconWidth - frame.SPACING*3, 0)
+		else
+			castbar:SetPoint("TOPLEFT", overlayFrame, "TOPLEFT", iconWidth + frame.SPACING*3, 0)
+			castbar:SetPoint("BOTTOMRIGHT", overlayFrame, "BOTTOMRIGHT")
+		end
+	end
+
+	if db.icon then
+		castbar.ButtonIcon.bg:Size(overlayHeight + frame.BORDER*2)
+	end
+
+	castbar.Text:ClearAllPoints()
+	castbar.Text:SetPoint("LEFT", castbar, "LEFT", db.overlayTextXOffset, db.overlayTextYOffset)
+	castbar.Time:ClearAllPoints()
+	castbar.Time:SetPoint("RIGHT", castbar, "RIGHT", db.overlayTimeXOffset, db.overlayTimeYOffset)
+	local textAlpha = db.overlayHideText and 0 or 1
+	castbar.Text:SetAlpha(textAlpha)
+	castbar.Time:SetAlpha(textAlpha)
+
+	if castbar.Spark then
+		castbar.Spark:Height(overlayHeight * 2)
+	end
+	castbar.tickHeight = castbar:GetHeight()
+
+	if castbar.Holder.mover then
+		local moverName = castbar.Holder.mover:GetName()
+		if E.CreatedMovers[moverName] then
+			E:DisableMover(moverName)
+		end
+	end
+
+	castbar.isOverlayed = true
+end
 
 local ticks = {}
 
@@ -102,6 +193,19 @@ function UF:Configure_Castbar(frame)
 	if not frame.VARIABLES_SET then return end
 	local castbar = frame.Castbar
 	local db = frame.db
+	MigrateCastbarOverlaySettings()
+
+	if castbar.isOverlayed then
+		castbar:SetFrameStrata(castbar.origFrameStrata)
+		castbar:SetFrameLevel(castbar.origFrameLevel)
+		castbar.Text:ClearAllPoints()
+		castbar.Text:Point("LEFT", castbar, "LEFT", 4, 0)
+		castbar.Time:ClearAllPoints()
+		castbar.Time:Point("RIGHT", castbar, "RIGHT", -4, 0)
+		castbar.Text:SetAlpha(1)
+		castbar.Time:SetAlpha(1)
+		castbar.isOverlayed = nil
+	end
 
 	if db.castbar.enable then
 		if not frame:IsElementEnabled("Castbar") then
@@ -243,6 +347,8 @@ function UF:Configure_Castbar(frame)
 				ticks[i]:Width(castbar.tickWidth)
 			end
 		end
+
+		ConfigureCastbarOverlay(frame, castbar, db.castbar)
 
 		castbar.custom_backdrop = UF.db.colors.customcastbarbackdrop and UF.db.colors.castbar_backdrop
 		UF:ToggleTransparentStatusBar(UF.db.colors.transparentCastbar, castbar, castbar.bg, nil, UF.db.colors.invertCastbar)
