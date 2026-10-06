@@ -16,6 +16,7 @@ local GetTime = GetTime
 local RAID_CLASS_COLORS = RAID_CLASS_COLORS
 
 local CREATED, VISIBLE, HIDDEN = 2, 1, 0
+local AURA_TYPES = { "Buffs", "Debuffs" }
 
 local positionValues = {
 	BOTTOMLEFT = "TOP",
@@ -181,8 +182,10 @@ function NP:SetAura(frame, guid, index, filter, isDebuff, visible)
 	end
 end
 
-function NP:Update_AurasPosition(frame, db)
-	local size = db.size + db.spacing
+function NP:Update_AurasPosition(frame, db, scale)
+	scale = scale or 1
+
+	local size = (db.size + db.spacing) * scale
 	local anchor = E.InversePoints[db.anchorPoint]
 	local growthx = (db.growthX == "LEFT" and -1) or 1
 	local growthy = (db.growthY == "DOWN" and -1) or 1
@@ -195,17 +198,17 @@ function NP:Update_AurasPosition(frame, db)
 		local col = (i - 1) % cols
 		local row = floor((i - 1) / cols)
 
-		button:SetSize(db.size, db.size)
+		button:SetSize(db.size * scale, db.size * scale)
 		button:ClearAllPoints()
 		button:SetPoint(anchor, frame, anchor, col * size * growthx, row * size * growthy)
 
-		button.count:FontTemplate(LSM:Fetch("font", db.countFont), db.countFontSize, db.countFontOutline)
+		button.count:FontTemplate(LSM:Fetch("font", db.countFont), db.countFontSize * scale, db.countFontOutline)
 		button.count:ClearAllPoints()
-		button.count:SetPoint(db.countPosition, db.countXOffset, db.countYOffset)
+		button.count:SetPoint(db.countPosition, db.countXOffset * scale, db.countYOffset * scale)
 
-		button.text:FontTemplate(LSM:Fetch("font", db.durationFont), db.durationFontSize, db.durationFontOutline)
+		button.text:FontTemplate(LSM:Fetch("font", db.durationFont), db.durationFontSize * scale, db.durationFontOutline)
 		button.text:ClearAllPoints()
-		button.text:SetPoint(db.durationPosition, db.durationXOffset, db.durationYOffset)
+		button.text:SetPoint(db.durationPosition, db.durationXOffset * scale, db.durationYOffset * scale)
 
 		button:SetOrientation(db.cooldownOrientation)
 
@@ -224,6 +227,18 @@ function NP:Update_AurasPosition(frame, db)
 		else
 			button:SetStatusBarColor(0, 0, 0, 0)
 			button.bg:SetTexture(0, 0, 0, 0.5)
+		end
+	end
+end
+
+function NP:Configure_AurasScale(frame, scale)
+	for _, auraType in ipairs(AURA_TYPES) do
+		local auras = frame[auraType]
+		local db = self.db.units[frame.UnitType][string.lower(auraType)]
+		if db.enable and #auras > 0 then
+			auras.anchoredIcons = 0
+			self:Update_AurasPosition(auras, db, scale)
+			auras.anchoredIcons = #auras
 		end
 	end
 end
@@ -280,7 +295,7 @@ function NP:UpdateElement_Auras(frame)
 		buffs.visibleBuffs = NP:UpdateElement_AuraIcons(buffs, guid, buffs.filter or "HELPFUL", db.perrow * db.numrows)
 
 		if #buffs > buffs.anchoredIcons then
-			self:Update_AurasPosition(buffs, db)
+			self:Update_AurasPosition(buffs, db, frame.currentScale or 1)
 
 			buffs.anchoredIcons = #buffs
 		end
@@ -292,7 +307,7 @@ function NP:UpdateElement_Auras(frame)
 		debuffs.visibleDebuffs = NP:UpdateElement_AuraIcons(debuffs, guid, debuffs.filter or "HARMFUL", db.perrow * db.numrows, true)
 
 		if #debuffs > debuffs.anchoredIcons then
-			self:Update_AurasPosition(debuffs, db)
+			self:Update_AurasPosition(debuffs, db, frame.currentScale or 1)
 
 			debuffs.anchoredIcons = #debuffs
 		end

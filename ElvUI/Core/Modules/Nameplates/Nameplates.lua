@@ -85,6 +85,7 @@ function NP:SetFrameScale(frame, scale, noPlayAnimation)
 		NP:Configure_HealthBarScale(frame, scale, noPlayAnimation)
 		NP:Configure_CastBarScale(frame, scale, noPlayAnimation)
 		NP:Configure_CPointsScale(frame, scale, noPlayAnimation)
+		NP:Configure_AurasScale(frame, scale)
 		frame.currentScale = scale
 	end
 end
