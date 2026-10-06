@@ -340,39 +340,30 @@ function E:GeneralMedia_ApplyToAll()
 	local font = E.db.general.font
 	local fontSize = E.db.general.fontSize
 
-	E.db.bags.itemLevelFont = font
-	E.db.bags.itemLevelFontSize = fontSize
-	E.db.bags.countFont = font
-	E.db.bags.countFontSize = fontSize
-	E.db.nameplates.font = font
-	E.db.actionbar.font = font
-	E.db.auras.buffs.countFont = font
-	E.db.auras.buffs.countFontSize = fontSize
-	E.db.auras.buffs.timeFont = font
-	E.db.auras.buffs.timeFontSize = fontSize
-	E.db.auras.debuffs.countFont = font
-	E.db.auras.debuffs.countFontSize = fontSize
-	E.db.auras.debuffs.timeFont = font
-	E.db.auras.debuffs.timeFontSize = fontSize
-	E.db.chat.font = font
-	E.db.chat.fontSize = fontSize
-	E.db.chat.tabFont = font
-	E.db.chat.tabFontSize = fontSize
-	E.db.datatexts.font = font
-	E.db.datatexts.fontSize = fontSize
-	E.db.general.minimap.locationFont = font
-	E.db.tooltip.font = font
-	E.db.tooltip.fontSize = fontSize
-	E.db.tooltip.headerFont = font
-	E.db.tooltip.headerFontSize = fontSize
-	E.db.tooltip.textFontSize = fontSize
-	E.db.tooltip.smallTextFontSize = fontSize
-	E.db.tooltip.healthBar.font = font
-	E.db.unitframe.font = font
-	E.db.unitframe.units.party.rdebuffs.font = font
-	E.db.unitframe.units.raid.rdebuffs.font = font
-	E.db.unitframe.units.raid40.rdebuffs.font = font
+	local visited = {}
+	local function ApplyFontSettings(settings)
+		if visited[settings] then return end
+		visited[settings] = true
 
+		for key, value in pairs(settings) do
+			if type(value) == 'table' then
+				if settings ~= E.db.general or key ~= 'fonts' then
+					ApplyFontSettings(value)
+				end
+			elseif type(key) == 'string' then
+				local setting = key:lower()
+				if type(value) == 'string' and setting:sub(-4) == 'font' then
+					settings[key] = font
+				elseif type(value) == 'number' and setting:sub(-8) == 'fontsize' then
+					settings[key] = fontSize
+				end
+			end
+		end
+	end
+
+	ApplyFontSettings(E.db)
+
+	E:UpdateFontTemplates()
 	E:StaggeredUpdateAll()
 end
 

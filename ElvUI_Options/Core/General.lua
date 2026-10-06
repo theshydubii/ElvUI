@@ -45,7 +45,18 @@ GenGen.textureGroup = ACH:Group(L["Textures"], nil, 20, nil, function(info) retu
 GenGen.textureGroup.inline = true
 GenGen.textureGroup.args.normTex = ACH:SharedMediaStatusbar(L["Primary Texture"], L["The texture that will be used mainly for statusbars."], 1, nil, nil, function(info, value) E.private.general[info[#info]] = value E:UpdateMedia() E:UpdateStatusBars() end)
 GenGen.textureGroup.args.glossTex = ACH:SharedMediaStatusbar(L["Secondary Texture"], L["This texture will get used on objects like chat windows and dropdown menus."], 2, nil, nil, function(info, value) E.private.general[info[#info]] = value E:UpdateMedia() E:UpdateFrameTemplates() end)
-GenGen.textureGroup.args.applyTextureToAll = ACH:Execute(L["Copy Primary Texture"], L["Replaces the StatusBar texture setting on Unitframes and Nameplates with the primary texture."], 3, function() E.db.unitframe.statusbar, E.db.nameplates.statusbar = E.private.general.normTex, E.private.general.normTex UF:Update_StatusBars() NP:ConfigureAll() end)
+GenGen.textureGroup.args.applyTextureToAll = ACH:Execute(L["Copy Primary Texture"], L["Applies the primary texture to UnitFrames, Nameplates, DataBars, and statusbars registered with ElvUI. This overrides custom statusbar textures for those elements."], 3, function()
+	local texture = E.private.general.normTex
+	E.db.unitframe.statusbar = texture
+	E.db.nameplates.statusbar = texture
+	E.db.databars.statusbar = texture
+	E.db.databars.customTexture = false
+
+	E:UpdateStatusBars()
+	UF:Update_StatusBars()
+	NP:ConfigureAll()
+	E:GetModule('DataBars'):UpdateAll()
+end)
 
 GenGen.colorsGroup = ACH:Group(L["Colors"], nil, 30, nil, function(info) local t, d = E.db.general[info[#info]], P.general[info[#info]] return t.r, t.g, t.b, t.a, d.r, d.g, d.b, d.a end, function(info, r, g, b, a) local setting = info[#info] local t = E.db.general[setting] t.r, t.g, t.b, t.a = r, g, b, a E:UpdateMedia() if setting == 'bordercolor' then E:UpdateBorderColors() elseif setting == 'backdropcolor' or setting == 'backdropfadecolor' then E:UpdateBackdropColors() end end)
 GenGen.colorsGroup.inline = true
@@ -92,7 +103,7 @@ Fonts.general = ACH:Group('', nil, 11, nil, nil, function(info, value) E.db.gene
 Fonts.general.args.font = ACH:SharedMediaFont(L["Default Font"], L["The font that the core of the UI will use."], 1)
 Fonts.general.args.fontSize = ACH:Range(L["Font Size"], L["Set the font size for everything in UI. Note: This doesn't effect somethings that have their own separate options (UnitFrame Font, Datatext Font, ect..)"], 2, C.Values.FontSize)
 Fonts.general.args.fontStyle = ACH:FontFlags(L["Font Outline"], nil, 3)
-Fonts.general.args.applyFontToAll = ACH:Execute(L["Apply Font To All"], L["Applies the font and font size settings throughout the entire user interface. Note: Some font size settings will be skipped due to them having a smaller font size by default."], 4, function() E:StaticPopup_Show('APPLY_FONT_WARNING') end)
+Fonts.general.args.applyFontToAll = ACH:Execute(L["Apply Font To All"], L["Applies the general font and size to all font settings in the ElvUI profile, then refreshes registered ElvUI font strings. It does not override font settings maintained independently by unrelated addons."], 4, function() E:StaticPopup_Show('APPLY_FONT_WARNING') end)
 Fonts.general.inline = true
 
 Fonts.blizzard = ACH:Group('', nil, 12, nil, function(info) return E.private.general[info[#info]] end, function(info, value) E.private.general[info[#info]] = value E.ShowPopup = true end)
