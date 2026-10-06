@@ -1955,21 +1955,19 @@ function B:ToggleBackpack()
 end
 
 function B:ToggleAllBags()
-	local backpack = IsBagOpen(BACKPACK_CONTAINER)
-
-	if B.BagBar then
-		if B.BagFrame:IsShown() and not backpack then
-			B:CloseAllBags()
-		elseif backpack then
+	if B.BagFrame:IsShown() then
+		B:CloseAllBags()
+	else
+		if B.BagBar then
 			B:SetBagsShown(true)
 			B:Layout()
-			B:OpenBags()
+		end
+
+		B:OpenBags()
+
+		if B.BagBar then
 			B:BagBar_UpdateDesaturated(false) -- force this when showing all
 		end
-	elseif backpack then
-		B:OpenBags()
-	else
-		B:CloseAllBags()
 	end
 end
 

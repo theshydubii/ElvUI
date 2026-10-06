@@ -112,10 +112,9 @@ local function SetTip(button)
 		GameTooltip:AddLine('|cffff3333'..L["Can't Roll"])
 	end
 
-	local rolls = button.parent.rolls[button.rolltype]
-	if rolls then
-		for _, infoTable in next, rolls do
-			local playerName, className = unpack(infoTable)
+	for playerName, infoTable in next, button.parent.rolls do
+		if infoTable[1] == button.rolltype then
+			local className = infoTable[2]
 			if not lineAdded then
 				GameTooltip:AddLine(" ")
 				lineAdded = true

@@ -211,8 +211,10 @@ function M:Initialize()
 		M:RegisterEvent('PLAYER_REGEN_DISABLED')
 	end
 
-	_G.WorldMapFrame:EnableMouse(false)
-	_G.WorldMapFrame.EnableMouse = E.noop
+	if not IsAddOnLoaded('Mapster') then
+		_G.WorldMapFrame:EnableMouse(false)
+		_G.WorldMapFrame.EnableMouse = E.noop
+	end
 
 	if E.global.general.smallerWorldMap then
 		_G.BlackoutWorld:SetTexture(nil)

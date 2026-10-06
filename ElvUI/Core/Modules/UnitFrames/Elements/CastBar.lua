@@ -2,10 +2,11 @@ local E, L, V, P, G = unpack(ElvUI)
 local UF = E:GetModule("UnitFrames")
 local ElvUF = E.oUF
 
-local unpack = unpack
+local next, unpack = next, unpack
 local abs, min = math.abs, math.min
 
 local CreateFrame = CreateFrame
+local GetSpellInfo = GetSpellInfo
 local UnitIsPlayer = UnitIsPlayer
 local UnitClass = UnitClass
 local UnitReaction = UnitReaction
@@ -370,6 +371,15 @@ function UF:PostCastStart(unit)
 	if self.channeling and db.castbar.ticks and unit == "player" then
 		local unitframe = E.global.unitframe
 		local baseTicks = unitframe.ChannelTicks[self.spellName]
+
+		if not baseTicks then
+			for spellID, numTicks in next, unitframe.ChannelTicks do
+				if GetSpellInfo(spellID) == self.spellName then
+					baseTicks = numTicks
+					break
+				end
+			end
+		end
 
 		if baseTicks then
 			UF:SetCastTicks(self, baseTicks)

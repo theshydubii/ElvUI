@@ -655,6 +655,8 @@ E:AddTag('manacolor', 'UNIT_DISPLAYPOWER', function()
 end)
 
 E:AddTag('incomingheals:personal', 'UNIT_HEAL_PREDICTION', function(unit)
+	if not UnitGetIncomingHeals then return end
+
 	local heal = UnitGetIncomingHeals(unit, 'player') or 0
 	if heal ~= 0 then
 		return E:ShortValue(heal)
@@ -662,6 +664,8 @@ E:AddTag('incomingheals:personal', 'UNIT_HEAL_PREDICTION', function(unit)
 end)
 
 E:AddTag('incomingheals:others', 'UNIT_HEAL_PREDICTION', function(unit)
+	if not UnitGetIncomingHeals then return end
+
 	local personal = UnitGetIncomingHeals(unit, 'player') or 0
 	local heal = UnitGetIncomingHeals(unit) or 0
 	local others = heal - personal
@@ -671,6 +675,8 @@ E:AddTag('incomingheals:others', 'UNIT_HEAL_PREDICTION', function(unit)
 end)
 
 E:AddTag('incomingheals', 'UNIT_HEAL_PREDICTION', function(unit)
+	if not UnitGetIncomingHeals then return end
+
 	local heal = UnitGetIncomingHeals(unit) or 0
 	if heal ~= 0 then
 		return E:ShortValue(heal)

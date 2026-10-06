@@ -11,9 +11,6 @@ function NP:Update_RaidIcon(frame)
 	icon:SetSize(db.size, db.size)
 
 	icon:ClearAllPoints()
-	if frame.Health:IsShown() then
-		icon:SetPoint(E.InversePoints[db.position], frame.Health, db.position, db.xOffset, db.yOffset)
-	else
-		icon:SetPoint("BOTTOM", frame, "TOP", 0, 15)
-	end
+	local anchor = frame.Health:IsShown() and frame.Health or frame
+	icon:SetPoint(E.InversePoints[db.position], anchor, db.position, db.xOffset, db.yOffset)
 end

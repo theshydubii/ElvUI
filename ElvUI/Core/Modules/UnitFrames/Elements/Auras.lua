@@ -96,7 +96,7 @@ function UF:UpdateAuraSettings(auras, button)
 		button.icon:SetTexCoords()
 	end
 
-	button:Size((auras and auras.size) or 30)
+	button:SetSize((auras and auras.width) or 30, (auras and auras.height) or 30)
 
 	button.needsUpdateCooldownPosition = true
 end
@@ -150,11 +150,19 @@ function UF:Configure_Auras(frame, auraType)
 	local rows = auras.db.numrows
 	auras.forceShow = frame.forceShowAuras
 	auras.num = auras.db.perrow * rows
-	auras.size = auras.db.sizeOverride ~= 0 and auras.db.sizeOverride or ((((auras:GetWidth() - (auras.spacing*(auras.num/rows - 1))) / auras.num)) * rows)
+	local defaultSize = (((auras:GetWidth() - (auras.spacing * (auras.num / rows - 1))) / auras.num) * rows)
+	local sizeOverride = auras.db.sizeOverride and auras.db.sizeOverride > 0 and auras.db.sizeOverride
+	if sizeOverride then defaultSize = sizeOverride end
+
+	local widthOverride = auras.db.widthOverride and auras.db.widthOverride > 0 and auras.db.widthOverride
+	local heightOverride = auras.db.heightOverride and auras.db.heightOverride > 0 and auras.db.heightOverride
+	auras.width = widthOverride or defaultSize
+	auras.height = heightOverride or defaultSize
+	auras.size = auras.height
 	auras.disableMouse = auras.db.clickThrough
 
-	if auras.db.sizeOverride and auras.db.sizeOverride > 0 then
-		auras:Width(auras.db.perrow * auras.db.sizeOverride)
+	if widthOverride or sizeOverride then
+		auras:Width(auras.db.perrow * auras.width)
 	else
 		local totalWidth = frame.UNIT_WIDTH - frame.SPACING*2
 		if frame.USE_POWERBAR_OFFSET then
@@ -200,7 +208,7 @@ function UF:Configure_Auras(frame, auraType)
 
 	auras:ClearAllPoints()
 	auras:Point(E.InversePoints[auras.db.anchorPoint], attachTo, auras.db.anchorPoint, x + auras.db.xOffset, y + auras.db.yOffset)
-	auras:Height(auras.size * rows)
+	auras:Height(auras.height * rows)
 	auras["growth-y"] = find(auras.db.anchorPoint, "TOP") and "UP" or "DOWN"
 	auras["growth-x"] = auras.db.anchorPoint == "LEFT" and "LEFT" or auras.db.anchorPoint == "RIGHT" and "RIGHT" or (find(auras.db.anchorPoint, "LEFT") and "RIGHT" or "LEFT")
 	auras.initialAnchor = E.InversePoints[auras.db.anchorPoint]
@@ -472,9 +480,9 @@ function UF:UpdateBuffsPositionAndDebuffHeight()
 
 	if numDebuffs > 0 then
 		local numRows = ceil(numDebuffs/db.debuffs.perrow)
-		debuffs:Height(debuffs.size * (numRows > db.debuffs.numrows and db.debuffs.numrows or numRows))
+		debuffs:Height(debuffs.height * (numRows > db.debuffs.numrows and db.debuffs.numrows or numRows))
 	else
-		debuffs:Height(debuffs.size)
+		debuffs:Height(debuffs.height)
 	end
 end
 
@@ -495,9 +503,9 @@ function UF:UpdateDebuffsPositionAndBuffHeight()
 
 	if numBuffs > 0 then
 		local numRows = ceil(numBuffs/db.buffs.perrow)
-		buffs:Height(buffs.size * (numRows > db.buffs.numrows and db.buffs.numrows or numRows))
+		buffs:Height(buffs.height * (numRows > db.buffs.numrows and db.buffs.numrows or numRows))
 	else
-		buffs:Height(buffs.size)
+		buffs:Height(buffs.height)
 	end
 end
 
@@ -509,9 +517,9 @@ function UF:UpdateBuffsHeight()
 
 	if numBuffs > 0 then
 		local numRows = ceil(numBuffs/db.buffs.perrow)
-		buffs:Height(buffs.size * (numRows > db.buffs.numrows and db.buffs.numrows or numRows))
+		buffs:Height(buffs.height * (numRows > db.buffs.numrows and db.buffs.numrows or numRows))
 	else
-		buffs:Height(buffs.size)
+		buffs:Height(buffs.height)
 		-- Any way to get rid of the last row as well?
 		-- Using buffs:Height(0) makes frames anchored to this one disappear
 	end
@@ -525,9 +533,9 @@ function UF:UpdateDebuffsHeight()
 
 	if numDebuffs > 0 then
 		local numRows = ceil(numDebuffs/db.debuffs.perrow)
-		debuffs:Height(debuffs.size * (numRows > db.debuffs.numrows and db.debuffs.numrows or numRows))
+		debuffs:Height(debuffs.height * (numRows > db.debuffs.numrows and db.debuffs.numrows or numRows))
 	else
-		debuffs:Height(debuffs.size)
+		debuffs:Height(debuffs.height)
 		-- Any way to get rid of the last row as well?
 		-- Using debuffs:Height(0) makes frames anchored to this one disappear
 	end

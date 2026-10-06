@@ -48,6 +48,9 @@ local function PanelGroup_Delete(panel)
 	E.Options.args.datatexts.args.panels.args[panel] = nil
 	E.db.datatexts.panels[panel] = nil
 	E.global.datatexts.customPanels[panel] = nil
+	if E.db.datatexts.battlePanel then
+		E.db.datatexts.battlePanel[panel] = nil
+	end
 
 	DT:ReleasePanel(panel)
 	E.Libs.AceConfigDialog:SelectGroup('ElvUI', 'datatexts', 'panels', 'newPanel')

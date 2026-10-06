@@ -219,7 +219,7 @@ function A:UpdateIcon(button, update)
 
 	if button.text then
 		button.text:ClearAllPoints()
-		button.text:Point('TOP', button, 'BOTTOM', db.timeXOffset, db.timeYOffset)
+		button.text:Point('TOP', button, 'BOTTOM', db.timeXOffset or 0, db.timeYOffset or 0)
 		button.text:FontTemplate(LSM:Fetch('font', db.timeFont), db.timeFontSize, db.timeFontOutline)
 	end
 

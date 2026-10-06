@@ -85,6 +85,8 @@ function E:Cooldown_OnUpdate(elapsed)
 end
 
 function E:Cooldown_OnSizeChanged(cd, width, force)
+	if width and (width ~= width or width <= 0 or width >= math.huge) then return end
+
 	local scale = width and (floor(width + 0.5) / ICON_SIZE)
 
 	-- dont bother updating when the fontScale is the same, unless we are passing the force arg

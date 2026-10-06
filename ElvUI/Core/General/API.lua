@@ -1080,7 +1080,11 @@ function E:PARTY_MEMBERS_CHANGED()
 		for i = 1, GetNumSubgroupMembers() do
 			local unit = group..i
 			local guid = UnitGUID(unit)
-			local role = guid and ((GetPartyAssignment('MAINTANK', unit) and 'TANK' or 'NONE') or UnitGroupRolesAssigned(unit))
+			local role = guid and (UnitGroupRolesAssigned(unit) or 'NONE')
+			if role and GetPartyAssignment('MAINTANK', unit) then
+				role = 'TANK'
+			end
+
 			if role then
 				E.GroupRoles[guid] = role
 				E.GroupUnitsByRole[role][guid] = unit
@@ -1104,7 +1108,11 @@ function E:RAID_ROSTER_UPDATE()
 		for i = 1, GetNumGroupMembers() do
 			local unit = group..i
 			local guid = UnitGUID(unit)
-			local role = guid and ((GetPartyAssignment('MAINTANK', unit) and 'TANK' or 'NONE') or UnitGroupRolesAssigned(unit))
+			local role = guid and (UnitGroupRolesAssigned(unit) or 'NONE')
+			if role and GetPartyAssignment('MAINTANK', unit) then
+				role = 'TANK'
+			end
+
 			if role then
 				E.GroupRoles[guid] = role
 				E.GroupUnitsByRole[role][guid] = unit
@@ -1121,6 +1129,7 @@ function E:LoadAPI()
 	E:RegisterEvent('PLAYER_REGEN_ENABLED')
 	E:RegisterEvent('PLAYER_REGEN_DISABLED')
 	E:RegisterEvent('UI_SCALE_CHANGED', 'PixelScaleChanged')
+	E:RegisterEvent('DISPLAY_SIZE_CHANGED', 'PixelScaleChanged')
 
 	E:PARTY_MEMBERS_CHANGED()
 	E:RAID_ROSTER_UPDATE()

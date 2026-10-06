@@ -889,6 +889,8 @@ L["If enabled, the style filter will only activate when you are in one of the su
 L["If enabled, the style filter will only activate when you are in one of the zones specified in Add Zone Name."] = true
 L["If enabled, then this currency will be displayed in the main Currencies datatext tooltip."] = true
 L["If not set to 0 then override the size of the aura icon to this."] = true
+L["Set to 0 to use the automatic width."] = true
+L["Set to 0 to use the automatic height."] = true
 L["If not set to true then the server time will be displayed instead."] = true
 L["If the aura is listed with a number then you need to use that to remove it from the list."] = true
 L["If this is enabled then the reaction check will use your reputation with the faction the unit belongs to."] = true

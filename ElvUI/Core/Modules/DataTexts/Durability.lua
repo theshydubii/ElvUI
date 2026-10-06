@@ -80,7 +80,11 @@ local function OnEnter()
 	DT.tooltip:ClearLines()
 
 	for slot, durability in pairs(invDurability) do
-		DT.tooltip:AddDoubleLine(format('|T%s:20:20:0:0:64:64:4:60:4:60|t %s', GetInventoryItemTexture('player', slot), GetInventoryItemLink('player', slot)), format(tooltipString, durability), 1, 1, 1, E:ColorGradient(durability * 0.01, 1, .1, .1, 1, 1, .1, .1, 1, .1))
+		local texture = GetInventoryItemTexture('player', slot)
+		local link = GetInventoryItemLink('player', slot)
+		if texture and link then
+			DT.tooltip:AddDoubleLine(format('|T%s:20:20:0:0:64:64:4:60:4:60|t %s', texture, link), format(tooltipString, durability), 1, 1, 1, E:ColorGradient(durability * 0.01, 1, .1, .1, 1, 1, .1, .1, 1, .1))
+		end
 	end
 
 	if totalRepairCost > 0 then

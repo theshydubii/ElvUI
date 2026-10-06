@@ -450,33 +450,47 @@ local function GetOptionsTable_Auras(auraType, updateFunc, groupName, numUnits)
 				desc = L["If not set to 0 then override the size of the aura icon to this."],
 				min = 0, max = 60, step = 1
 			},
-			xOffset = {
+			widthOverride = {
 				order = 6,
+				type = "range",
+				name = L["Width"],
+				desc = L["Set to 0 to use the automatic width."],
+				min = 0, max = 60, step = 1
+			},
+			heightOverride = {
+				order = 7,
+				type = "range",
+				name = L["Height"],
+				desc = L["Set to 0 to use the automatic height."],
+				min = 0, max = 60, step = 1
+			},
+			xOffset = {
+				order = 9,
 				type = "range",
 				name = L["X-Offset"],
 				min = -300, max = 300, step = 1
 			},
 			yOffset = {
-				order = 7,
+				order = 10,
 				type = "range",
 				name = L["Y-Offset"],
 				min = -300, max = 300, step = 1
 			},
 			anchorPoint = {
-				order = 8,
+				order = 11,
 				type = "select",
 				name = L["Anchor Point"],
 				desc = L["What point to anchor to the frame you set to attach to."],
 				values = positionValues
 			},
 			clickThrough = {
-				order = 9,
+				order = 12,
 				type = "toggle",
 				name = L["Click Through"],
 				desc = L["Ignore mouse events."]
 			},
 			sortMethod = {
-				order = 10,
+				order = 13,
 				type = "select",
 				name = L["Sort By"],
 				desc = L["Method to sort by."],
@@ -489,7 +503,7 @@ local function GetOptionsTable_Auras(auraType, updateFunc, groupName, numUnits)
 				}
 			},
 			sortDirection = {
-				order = 11,
+				order = 14,
 				type = "select",
 				name = L["Sort Direction"],
 				desc = L["Ascending or Descending order."],
@@ -499,7 +513,7 @@ local function GetOptionsTable_Auras(auraType, updateFunc, groupName, numUnits)
 				}
 			},
 			stacks = {
-				order = 12,
+				order = 15,
 				type = "group",
 				name = L["Stack Counter"],
 				guiInline = true,
@@ -528,7 +542,7 @@ local function GetOptionsTable_Auras(auraType, updateFunc, groupName, numUnits)
 				}
 			},
 			duration = {
-				order = 13,
+				order = 16,
 				type = "group",
 				name = L["Duration"],
 				guiInline = true,
@@ -569,7 +583,7 @@ local function GetOptionsTable_Auras(auraType, updateFunc, groupName, numUnits)
 
 	if auraType == "buffs" then
 		config.args.attachTo = {
-			order = 7,
+			order = 8,
 			type = "select",
 			name = L["Attach To"],
 			desc = L["What to attach the buff anchor frame to."],
@@ -586,7 +600,7 @@ local function GetOptionsTable_Auras(auraType, updateFunc, groupName, numUnits)
 		}
 	else
 		config.args.attachTo = {
-			order = 7,
+			order = 8,
 			type = "select",
 			name = L["Attach To"],
 			desc = L["What to attach the debuff anchor frame to."],
