@@ -347,6 +347,95 @@ for textFormat in pairs(E.GetFormattedTextStyles) do
 	end
 end
 
+local resourceFormats = {
+	{ tag = 'percent', style = 'PERCENT', description = 'current value as a percentage' },
+	{ tag = 'current', style = 'CURRENT', description = 'current value' },
+	{ tag = 'current-percent', style = 'CURRENT_PERCENT', description = 'current value and percentage while not full' },
+}
+local healthStates = {
+	{ tag = 'hidefull', hideFull = true, description = 'hidden at full health' },
+	{ tag = 'hidedead', hideDead = true, description = 'hidden while dead or a ghost' },
+	{ tag = 'hidefull:hidedead', hideFull = true, hideDead = true, description = 'hidden at full health and while dead or a ghost' },
+}
+local powerStates = {
+	{ tag = 'hidefull', hideFull = true, description = 'hidden at full power' },
+	{ tag = 'hidezero', hideZero = true, description = 'hidden at zero power' },
+	{ tag = 'hidefull:hidezero', hideFull = true, hideZero = true, description = 'hidden at full or zero power' },
+	{ tag = 'hidedead', hideDead = true, description = 'hidden while dead or a ghost' },
+	{ tag = 'hidefull:hidedead', hideFull = true, hideDead = true, description = 'hidden at full power and while dead or a ghost' },
+}
+local healthEvents = 'UNIT_HEALTH UNIT_MAXHEALTH UNIT_CONNECTION PLAYER_FLAGS_CHANGED'
+local powerEvents = 'UNIT_DISPLAYPOWER UNIT_MAXPOWER UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_MAXRUNIC_POWER UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_RUNIC_POWER UNIT_HEALTH UNIT_CONNECTION PLAYER_FLAGS_CHANGED'
+
+local function FormatResourceText(style, current, maximum, compact)
+	if maximum == 0 then maximum = 1 end
+
+	local value = compact and E:ShortValue(current) or LC.BreakUpLargeNumbers(current)
+	if style == 'CURRENT' then
+		return value
+	elseif style == 'PERCENT' then
+		return format('%.0f%%', current / maximum * 100)
+	elseif style == 'CURRENT_PERCENT' then
+		if current == maximum then
+			return value
+		else
+			return format('%s - %.0f%%', value, current / maximum * 100)
+		end
+	end
+end
+
+local function RegisterResourceTag(tag, events, style, compact, hideFull, hideZero, hideDead, isHealth)
+	E:AddTag(tag, events, function(unit)
+		local current, maximum
+		if isHealth then
+			current, maximum = UnitHealth(unit), UnitHealthMax(unit)
+		else
+			local powerType = UnitPowerType(unit)
+			current, maximum = UnitPower(unit, powerType), UnitPowerMax(unit, powerType)
+		end
+
+		if (hideFull and maximum - current <= 0)
+		or (hideZero and current <= 0)
+		or (hideDead and UnitIsDeadOrGhost(unit)) then
+			return ''
+		end
+
+		return FormatResourceText(style, current, maximum, compact)
+	end)
+end
+
+for _, resourceFormat in ipairs(resourceFormats) do
+	for _, state in ipairs(healthStates) do
+		RegisterResourceTag(
+			format('health:%s:%s', resourceFormat.tag, state.tag),
+			healthEvents,
+			resourceFormat.style,
+			true,
+			state.hideFull,
+			nil,
+			state.hideDead,
+			true
+		)
+	end
+
+	for _, state in ipairs(powerStates) do
+		RegisterResourceTag(
+			format('power:%s:%s', resourceFormat.tag, state.tag),
+			powerEvents,
+			resourceFormat.style,
+			true,
+			state.hideFull,
+			state.hideZero,
+			state.hideDead
+		)
+	end
+end
+
+RegisterResourceTag('health:current-percent:exact', healthEvents, 'CURRENT_PERCENT', false, nil, nil, nil, true)
+RegisterResourceTag('health:current-percent:compact', healthEvents, 'CURRENT_PERCENT', true, nil, nil, nil, true)
+RegisterResourceTag('power:current-percent:exact', powerEvents, 'CURRENT_PERCENT', false)
+RegisterResourceTag('power:current-percent:compact', powerEvents, 'CURRENT_PERCENT', true)
+
 ------------------------------------------------------------------------
 --	Regular
 ------------------------------------------------------------------------
@@ -1477,5 +1566,28 @@ function E:AddTagInfo(tagName, category, description, order, hidden)
 
 	return info
 end
+
+for _, resourceFormat in ipairs(resourceFormats) do
+	for _, state in ipairs(healthStates) do
+		E:AddTagInfo(
+			format('health:%s:%s', resourceFormat.tag, state.tag),
+			'Health',
+			format('Displays the unit health %s; %s. Values use compact formatting.', resourceFormat.description, state.description)
+		)
+	end
+
+	for _, state in ipairs(powerStates) do
+		E:AddTagInfo(
+			format('power:%s:%s', resourceFormat.tag, state.tag),
+			'Power',
+			format('Displays the unit power %s; %s. Values use compact formatting.', resourceFormat.description, state.description)
+		)
+	end
+end
+
+E:AddTagInfo('health:current-percent:exact', 'Health', 'Displays current health with thousands separators and the percentage when not full; never abbreviates the value.')
+E:AddTagInfo('health:current-percent:compact', 'Health', 'Displays current health in compact form and the percentage when not full; uses the configured number prefix.')
+E:AddTagInfo('power:current-percent:exact', 'Power', 'Displays current power with thousands separators and the percentage when not full; never abbreviates the value.')
+E:AddTagInfo('power:current-percent:compact', 'Power', 'Displays current power in compact form and the percentage when not full; uses the configured number prefix.')
 
 RefreshNewTags = true
