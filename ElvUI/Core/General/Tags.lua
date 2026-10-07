@@ -367,11 +367,18 @@ local powerStates = {
 local healthEvents = 'UNIT_HEALTH UNIT_MAXHEALTH UNIT_CONNECTION PLAYER_FLAGS_CHANGED'
 local powerEvents = 'UNIT_DISPLAYPOWER UNIT_MAXPOWER UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_MAXRUNIC_POWER UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_RUNIC_POWER UNIT_HEALTH UNIT_CONNECTION PLAYER_FLAGS_CHANGED'
 
-local function FormatResourceText(style, current, maximum, compact)
+local function FormatResourceText(style, current, maximum, compact, alwaysShowPercent)
+	if alwaysShowPercent and style == 'CURRENT_PERCENT' then
+		if maximum == 0 then maximum = 1 end
+
+		local value = compact and E:ShortValue(current) or LC.BreakUpLargeNumbers(current)
+		return format(E.GetFormattedTextStyles.CURRENT_PERCENT, value, current / maximum * 100)
+	end
+
 	return E:GetFormattedText(style, current, maximum, nil, compact)
 end
 
-local function RegisterResourceTag(tag, events, style, compact, hideFull, hideZero, hideDead, isHealth)
+local function RegisterResourceTag(tag, events, style, compact, hideFull, hideZero, hideDead, isHealth, alwaysShowPercent)
 	E:AddTag(tag, events, function(unit)
 		local current, maximum
 		if isHealth then
@@ -387,7 +394,7 @@ local function RegisterResourceTag(tag, events, style, compact, hideFull, hideZe
 			return ''
 		end
 
-		return FormatResourceText(style, current, maximum, compact)
+		return FormatResourceText(style, current, maximum, compact, alwaysShowPercent)
 	end)
 end
 
@@ -418,10 +425,10 @@ for _, resourceFormat in ipairs(resourceFormats) do
 	end
 end
 
-RegisterResourceTag('health:current-percent:exact', healthEvents, 'CURRENT_PERCENT', false, nil, nil, nil, true)
-RegisterResourceTag('health:current-percent:compact', healthEvents, 'CURRENT_PERCENT', true, nil, nil, nil, true)
-RegisterResourceTag('power:current-percent:exact', powerEvents, 'CURRENT_PERCENT', false)
-RegisterResourceTag('power:current-percent:compact', powerEvents, 'CURRENT_PERCENT', true)
+RegisterResourceTag('health:current-percent:exact', healthEvents, 'CURRENT_PERCENT', false, nil, nil, nil, true, true)
+RegisterResourceTag('health:current-percent:compact', healthEvents, 'CURRENT_PERCENT', true, nil, nil, nil, true, true)
+RegisterResourceTag('power:current-percent:exact', powerEvents, 'CURRENT_PERCENT', false, nil, nil, nil, nil, true)
+RegisterResourceTag('power:current-percent:compact', powerEvents, 'CURRENT_PERCENT', true, nil, nil, nil, nil, true)
 
 ------------------------------------------------------------------------
 --	Regular
@@ -1578,9 +1585,9 @@ for _, resourceFormat in ipairs(resourceFormats) do
 	end
 end
 
-E:AddTagInfo('health:current-percent:exact', 'Health', 'Displays current health with thousands separators and the percentage when not full; never abbreviates the value.')
-E:AddTagInfo('health:current-percent:compact', 'Health', 'Displays current health in compact form and the percentage when not full; uses the configured number prefix.')
-E:AddTagInfo('power:current-percent:exact', 'Power', 'Displays current power with thousands separators and the percentage when not full; never abbreviates the value.')
-E:AddTagInfo('power:current-percent:compact', 'Power', 'Displays current power in compact form and the percentage when not full; uses the configured number prefix.')
+E:AddTagInfo('health:current-percent:exact', 'Health', 'Displays current health with thousands separators and percentage, including at full health.')
+E:AddTagInfo('health:current-percent:compact', 'Health', 'Displays current health in compact form and percentage, including at full health; uses the configured number prefix.')
+E:AddTagInfo('power:current-percent:exact', 'Power', 'Displays current power with thousands separators and percentage, including at full power.')
+E:AddTagInfo('power:current-percent:compact', 'Power', 'Displays current power in compact form and percentage, including at full power; uses the configured number prefix.')
 
 RefreshNewTags = true

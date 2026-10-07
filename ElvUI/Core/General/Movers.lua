@@ -387,6 +387,7 @@ function E:CreateMover(parent, name, textString, overlay, snapoffset, postdrag, 
 	end
 
 	UpdateMover(name, parent, textString, overlay, snapoffset, postdrag, shouldDisable, configString, ignoreSizeChanged)
+	holder.shouldDisable = shouldDisable
 
 	return holder
 end

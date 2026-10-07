@@ -258,21 +258,35 @@ function LO:ToggleChatPanels()
 
 	local panelBackdrop = E.db.chat.panelBackdrop
 	if panelBackdrop == 'SHOWBOTH' then
-		_G.LeftChatPanel.backdrop:Show()
-		_G.RightChatPanel.backdrop:Show()
+		_G.LeftChatPanel.backdrop:SetShown(showLeftPanel)
+		_G.RightChatPanel.backdrop:SetShown(showRightPanel)
 		LO:ToggleChatTabPanels()
 	elseif panelBackdrop == 'HIDEBOTH' then
 		_G.LeftChatPanel.backdrop:Hide()
 		_G.RightChatPanel.backdrop:Hide()
 		LO:ToggleChatTabPanels(true, true)
 	elseif panelBackdrop == 'LEFT' then
-		_G.LeftChatPanel.backdrop:Show()
-		_G.RightChatPanel.backdrop:Hide()
+		local showLeftBackdrop = showLeftPanel
+		_G.LeftChatPanel.backdrop:SetShown(showLeftBackdrop)
+		_G.RightChatPanel.backdrop:SetShown(not showLeftBackdrop and showRightPanel)
 		LO:ToggleChatTabPanels(true)
 	else
-		_G.LeftChatPanel.backdrop:Hide()
-		_G.RightChatPanel.backdrop:Show()
+		local showRightBackdrop = showRightPanel
+		_G.LeftChatPanel.backdrop:SetShown(not showRightBackdrop and showLeftPanel)
+		_G.RightChatPanel.backdrop:SetShown(showRightBackdrop)
 		LO:ToggleChatTabPanels(nil, true)
+	end
+
+	if showLeftPanel then
+		E:EnableMover('LeftChatMover')
+	else
+		E:DisableMover('LeftChatMover')
+	end
+
+	if showRightPanel then
+		E:EnableMover('RightChatMover')
+	else
+		E:DisableMover('RightChatMover')
 	end
 end
 
@@ -301,7 +315,7 @@ function LO:CreateChatPanels()
 	lchat:CreateBackdrop('Transparent', nil, nil, nil, nil, nil, nil, true)
 	lchat.backdrop.callbackBackdropColor = CH.Panel_ColorUpdate
 	lchat.FadeObject = {finishedFunc = finishFade, finishedArg1 = lchat, finishedFuncKeep = true}
-	E:CreateMover(lchat, 'LeftChatMover', L["Left Chat"], nil, nil, LO.ResaveChatPosition, nil, nil, 'chat,general', true)
+	E:CreateMover(lchat, 'LeftChatMover', L["Left Chat"], nil, nil, LO.ResaveChatPosition, nil, function() return not E.db.datatexts.panels.LeftChatDataPanel.enable end, 'chat,general', true)
 
 	--Background Texture
 	local lchattex = lchat:CreateTexture(nil, 'OVERLAY')
@@ -350,7 +364,7 @@ function LO:CreateChatPanels()
 	rchat:CreateBackdrop('Transparent', nil, nil, nil, nil, nil, nil, true)
 	rchat.backdrop.callbackBackdropColor = CH.Panel_ColorUpdate
 	rchat.FadeObject = {finishedFunc = finishFade, finishedArg1 = rchat, finishedFuncKeep = true}
-	E:CreateMover(rchat, 'RightChatMover', L["Right Chat"], nil, nil, LO.ResaveChatPosition, nil, nil, 'chat,general', true)
+	E:CreateMover(rchat, 'RightChatMover', L["Right Chat"], nil, nil, LO.ResaveChatPosition, nil, function() return not E.db.datatexts.panels.RightChatDataPanel.enable end, 'chat,general', true)
 
 	--Background Texture
 	local rchattex = rchat:CreateTexture(nil, 'OVERLAY')
