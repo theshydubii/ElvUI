@@ -1556,6 +1556,7 @@ L["Show Zone"] = true
 L["Show"] = true
 L["Show Power Bar"] = true
 L["Hide the power bar while keeping its text visible."] = true
+L["Adds vertical space between the unitframe and its castbar without creating a separate mover."] = true
 L["Show/Hide Test Frame"] = true
 L["Shows a swipe animation when a spell is recharging but still has charges left."] = true
 L["Shows item level of each item, enchants, and gems on the character page."] = true

@@ -194,6 +194,7 @@ function UF:Configure_Castbar(frame)
 			end
 		else
 			local isMoved = E:HasMoverBeenMoved(frame:GetName().."CastbarMover") or not castbar.Holder.mover
+			local spacing = db.castbar.spacing or 0
 			if not isMoved then
 				castbar.Holder.mover:ClearAllPoints()
 			end
@@ -202,12 +203,18 @@ function UF:Configure_Castbar(frame)
 			if frame.ORIENTATION ~= "RIGHT" then
 				castbar:Point("BOTTOMRIGHT", castbar.Holder, "BOTTOMRIGHT", -(frame.BORDER+frame.SPACING), frame.BORDER+frame.SPACING)
 				if not isMoved then
-					castbar.Holder.mover:Point("TOPRIGHT", frame, "BOTTOMRIGHT", 0, -(frame.BORDER - frame.SPACING))
+					castbar.Holder.mover:Point("TOPRIGHT", frame, "BOTTOMRIGHT", 0, -(frame.BORDER - frame.SPACING) - spacing)
+				elseif not castbar.Holder.mover then
+					castbar.Holder:ClearAllPoints()
+					castbar.Holder:Point("TOPLEFT", frame, "BOTTOMLEFT", 0, -(frame.BORDER - frame.SPACING) - spacing)
 				end
 			else
 				castbar:Point("BOTTOMLEFT", castbar.Holder, "BOTTOMLEFT", frame.BORDER+frame.SPACING, frame.BORDER+frame.SPACING)
 				if not isMoved then
-					castbar.Holder.mover:Point("TOPLEFT", frame, "BOTTOMLEFT", 0, -(frame.BORDER - frame.SPACING))
+					castbar.Holder.mover:Point("TOPLEFT", frame, "BOTTOMLEFT", 0, -(frame.BORDER - frame.SPACING) - spacing)
+				elseif not castbar.Holder.mover then
+					castbar.Holder:ClearAllPoints()
+					castbar.Holder:Point("TOPLEFT", frame, "BOTTOMLEFT", 0, -(frame.BORDER - frame.SPACING) - spacing)
 				end
 			end
 

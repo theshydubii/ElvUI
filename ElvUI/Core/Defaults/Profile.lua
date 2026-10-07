@@ -4546,6 +4546,10 @@ P.actionbar.bar5.buttons = 6
 P.actionbar.bar5.buttonsPerRow = 6
 
 for _, unit in next, P.unitframe.units do
+	if unit.castbar then
+		unit.castbar.spacing = 0
+	end
+
 	if unit.power then
 		unit.power.showBar = true
 	end
