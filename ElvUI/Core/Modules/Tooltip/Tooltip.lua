@@ -882,6 +882,12 @@ function TT:Initialize()
 	end
 	TT:SetTooltipFonts()
 
+	for _, tooltip in ipairs({ GameTooltip, _G.ItemRefTooltip, ShoppingTooltip1, ShoppingTooltip2, ShoppingTooltip3 }) do
+		tooltip:SetClampRectInsets(10, 10, 10, 10)
+		tooltip:SetClampedToScreen(true)
+		tooltip:SetFrameStrata('TOOLTIP')
+	end
+
 	local GameTooltipAnchor = CreateFrame('Frame', 'GameTooltipAnchor', E.UIParent)
 	GameTooltipAnchor:Point('BOTTOMRIGHT', _G.RightChatToggleButton, 'BOTTOMRIGHT')
 	GameTooltipAnchor:Size(130, 20)
