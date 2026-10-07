@@ -214,7 +214,19 @@ end
 
 function UF:GetHealthBottomOffset(frame)
 	local bottomOffset = 0
-	if frame.USE_POWERBAR and not frame.POWERBAR_DETACHED and not frame.USE_INSET_POWERBAR then
+	local showPowerBar = not (frame.db and frame.db.power and frame.db.power.showBar == false)
+
+	if not showPowerBar then
+		frame.POWERBAR_HEIGHT = 0
+		frame.USE_MINI_POWERBAR = false
+		frame.USE_INSET_POWERBAR = false
+		frame.USE_POWERBAR_OFFSET = false
+		frame.POWERBAR_OFFSET = 0
+		frame.USE_INFO_PANEL = frame.db.infoPanel and frame.db.infoPanel.enable
+		frame.INFO_PANEL_HEIGHT = frame.USE_INFO_PANEL and frame.db.infoPanel.height or 0
+	end
+
+	if frame.USE_POWERBAR and showPowerBar and not frame.POWERBAR_DETACHED and not frame.USE_INSET_POWERBAR then
 		bottomOffset = bottomOffset + frame.POWERBAR_HEIGHT - (frame.BORDER-frame.SPACING)
 	end
 	if frame.USE_INFO_PANEL then

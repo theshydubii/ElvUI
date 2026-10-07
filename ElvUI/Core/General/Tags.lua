@@ -368,20 +368,7 @@ local healthEvents = 'UNIT_HEALTH UNIT_MAXHEALTH UNIT_CONNECTION PLAYER_FLAGS_CH
 local powerEvents = 'UNIT_DISPLAYPOWER UNIT_MAXPOWER UNIT_MAXENERGY UNIT_MAXFOCUS UNIT_MAXMANA UNIT_MAXRAGE UNIT_MAXRUNIC_POWER UNIT_ENERGY UNIT_FOCUS UNIT_MANA UNIT_RAGE UNIT_RUNIC_POWER UNIT_HEALTH UNIT_CONNECTION PLAYER_FLAGS_CHANGED'
 
 local function FormatResourceText(style, current, maximum, compact)
-	if maximum == 0 then maximum = 1 end
-
-	local value = compact and E:ShortValue(current) or LC.BreakUpLargeNumbers(current)
-	if style == 'CURRENT' then
-		return value
-	elseif style == 'PERCENT' then
-		return format('%.0f%%', current / maximum * 100)
-	elseif style == 'CURRENT_PERCENT' then
-		if current == maximum then
-			return value
-		else
-			return format('%s - %.0f%%', value, current / maximum * 100)
-		end
-	end
+	return E:GetFormattedText(style, current, maximum, nil, compact)
 end
 
 local function RegisterResourceTag(tag, events, style, compact, hideFull, hideZero, hideDead, isHealth)

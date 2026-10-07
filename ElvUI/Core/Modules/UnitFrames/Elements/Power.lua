@@ -70,7 +70,7 @@ function UF:Configure_Power(frame)
 		power.value:Point(db.power.position, attachPoint, db.power.position, db.power.xOffset, db.power.yOffset)
 		frame:Tag(power.value, db.power.text_format)
 
-		if db.power.attachTextTo == "Power" then
+		if db.power.attachTextTo == "Power" and db.power.showBar ~= false then
 			power.value:SetParent(power.RaisedElementParent)
 		else
 			power.value:SetParent(frame.RaisedElementParent)
@@ -90,11 +90,11 @@ function UF:Configure_Power(frame)
 
 		--Fix height in case it is lower than the theme allows
 		local heightChanged = false
-		if (not self.thinBorders and not E.PixelMode) and frame.POWERBAR_HEIGHT < 7 then --A height of 7 means 6px for borders and just 1px for the actual power statusbar
+		if db.power.showBar ~= false and (not self.thinBorders and not E.PixelMode) and frame.POWERBAR_HEIGHT < 7 then --A height of 7 means 6px for borders and just 1px for the actual power statusbar
 			frame.POWERBAR_HEIGHT = 7
 			if db.power then db.power.height = 7 end
 			heightChanged = true
-		elseif (self.thinBorders or E.PixelMode) and frame.POWERBAR_HEIGHT < 3 then --A height of 3 means 2px for borders and just 1px for the actual power statusbar
+		elseif db.power.showBar ~= false and (self.thinBorders or E.PixelMode) and frame.POWERBAR_HEIGHT < 3 then --A height of 3 means 2px for borders and just 1px for the actual power statusbar
 			frame.POWERBAR_HEIGHT = 3
 			if db.power then db.power.height = 3 end
 			heightChanged = true
@@ -204,6 +204,12 @@ function UF:Configure_Power(frame)
 
 	--Transparency Settings
 	UF:ToggleTransparentStatusBar(UF.db.colors.transparentPower, power, power.BG, nil, UF.db.colors.invertPower)
+
+	if frame.USE_POWERBAR and db.power.showBar == false then
+		power:Hide()
+	elseif frame.USE_POWERBAR then
+		power:Show()
+	end
 end
 
 local tokens = {[0] = "MANA", "RAGE", "FOCUS", "ENERGY", "RUNIC_POWER"}

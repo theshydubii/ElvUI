@@ -883,8 +883,15 @@ local function GetOptionsTable_Power(hasDetatchOption, updateFunc, groupName, nu
 				type = "toggle",
 				name = L["Enable"]
 			},
-			width = {
+			showBar = {
 				order = 3,
+				type = "toggle",
+				name = L["Show Power Bar"],
+				desc = L["Hide the power bar while keeping its text visible."],
+				disabled = function() return not E.db.unitframe.units[groupName].power.enable end
+			},
+			width = {
+				order = 4,
 				type = "select",
 				name = L["Style"],
 				values = {
@@ -931,47 +938,47 @@ local function GetOptionsTable_Power(hasDetatchOption, updateFunc, groupName, nu
 				end
 			},
 			height = {
-				order = 4,
+				order = 5,
 				type = "range",
 				name = L["Height"],
 				min = ((E.db.unitframe.thinBorders or E.PixelMode) and 3 or 7), max = 50, step = 1
 			},
 			offset = {
-				order = 5,
+				order = 6,
 				type = "range",
 				name = L["Offset"],
 				desc = L["Offset of the powerbar to the healthbar, set to 0 to disable."],
 				min = 0, max = 20, step = 1
 			},
 			configureButton = {
-				order = 6,
+				order = 7,
 				type = "execute",
 				name = L["Coloring"],
 				desc = L["This opens the UnitFrames Color settings. These settings affect all unitframes."],
 				func = function() ACD:SelectGroup("ElvUI", "unitframe", "general", "allColorsGroup", "powerGroup") end,
 			},
 			position = {
-				order = 7,
+				order = 8,
 				type = "select",
 				name = L["Text Position"],
 				values = positionValues
 			},
 			xOffset = {
-				order = 8,
+				order = 9,
 				type = "range",
 				name = L["Text xOffset"],
 				desc = L["Offset position for text."],
 				min = -300, max = 300, step = 1
 			},
 			yOffset = {
-				order = 9,
+				order = 10,
 				type = "range",
 				name = L["Text yOffset"],
 				desc = L["Offset position for text."],
 				min = -300, max = 300, step = 1
 			},
 			attachTextTo = {
-				order = 10,
+				order = 11,
 				type = "select",
 				name = L["Attach Text To"],
 				values = attachToValues
@@ -988,19 +995,19 @@ local function GetOptionsTable_Power(hasDetatchOption, updateFunc, groupName, nu
 
 	if hasDetatchOption then
 		config.args.detachFromFrame = {
-			order = 11,
+			order = 12,
 			type = "toggle",
 			name = L["Detach From Frame"]
 		}
 		config.args.detachedWidth = {
-			order = 12,
+			order = 13,
 			type = "range",
 			name = L["Detached Width"],
 			disabled = function() return not E.db.unitframe.units[groupName].power.detachFromFrame end,
 			min = 15, max = 1000, step = 1
 		}
 		config.args.parent = {
-			order = 13,
+			order = 14,
 			type = "select",
 			name = L["Parent"],
 			desc = L["Choose UIPARENT to prevent it from hiding with the unitframe."],

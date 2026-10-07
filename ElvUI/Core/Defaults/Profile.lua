@@ -4546,6 +4546,10 @@ P.actionbar.bar5.buttons = 6
 P.actionbar.bar5.buttonsPerRow = 6
 
 for _, unit in next, P.unitframe.units do
+	if unit.power then
+		unit.power.showBar = true
+	end
+
 	if unit.buffs then
 		unit.buffs.widthOverride = 0
 		unit.buffs.heightOverride = 0
