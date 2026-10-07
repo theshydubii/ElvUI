@@ -1997,7 +1997,9 @@ function B:SetBagsShown(show)
 end
 
 function B:OpenAllBags(frame)
-	if not frame then return end
+	if not frame then
+		return B:ToggleAllBags()
+	end
 
 	local mail = frame == _G.MailFrame and frame:IsShown()
 	local vendor = frame == _G.MerchantFrame and frame:IsShown()
