@@ -96,9 +96,44 @@ function TT:SetCompareItems(tt, value)
 	end
 end
 
+function TT:ClampTooltipToScreen(tt)
+	if not tt then return end
+
+	local left, right = tt:GetLeft(), tt:GetRight()
+	local bottom, top = tt:GetBottom(), tt:GetTop()
+	if not (left and right and bottom and top) then return end
+
+	local margin = 10
+	local screenWidth = _G.GetScreenWidth()
+	local screenHeight = _G.GetScreenHeight()
+	local xOffset, yOffset = 0, 0
+
+	if left < margin then
+		xOffset = margin - left
+	elseif right > screenWidth - margin then
+		xOffset = (screenWidth - margin) - right
+	end
+
+	if bottom < margin then
+		yOffset = margin - bottom
+	elseif top > screenHeight - margin then
+		yOffset = (screenHeight - margin) - top
+	end
+
+	if xOffset ~= 0 or yOffset ~= 0 then
+		local point, relativeTo, relativePoint, x, y = tt:GetPoint()
+		if point and relativeTo then
+			tt:ClearAllPoints()
+			tt:SetPoint(point, relativeTo, relativePoint, x + xOffset, y + yOffset)
+		end
+	end
+end
+
 function TT:GameTooltip_SetDefaultAnchor(tt, parent)
 	if not E.private.tooltip.enable or not TT.db.visibility or tt:GetAnchorType() ~= 'ANCHOR_NONE' then
 		return
+	elseif parent and tt:IsShown() and parent ~= tt:GetOwner() then
+		tt:Hide()
 	elseif (InCombatLockdown() and not TT:IsModKeyDown(TT.db.visibility.combatOverride)) or (not AB.KeyBinder.active and not TT:IsModKeyDown(TT.db.visibility.actionbars) and AB.handledbuttons[tt:GetOwner()]) then
 		TT:SetCompareItems(tt, false)
 		tt:Hide() -- during kb mode this will trigger AB.ShowBinds
@@ -133,6 +168,7 @@ function TT:GameTooltip_SetDefaultAnchor(tt, parent)
 			local pointY = TT.db.cursorAnchorY
 
 			tt:SetOwner(parent, anchor, pointX, pointY)
+			TT:ClampTooltipToScreen(tt)
 			return
 		else
 			tt:SetOwner(parent, 'ANCHOR_NONE')
@@ -167,6 +203,8 @@ function TT:GameTooltip_SetDefaultAnchor(tt, parent)
 			end
 		end
 	end
+
+	TT:ClampTooltipToScreen(tt)
 end
 
 function TT:GetItemLvL(unit)
@@ -510,6 +548,8 @@ function TT:GameTooltip_OnTooltipSetUnit(data)
 			self:SetMinimumWidth(textWidth)
 		end
 	end
+
+	TT:ClampTooltipToScreen(self)
 end
 
 function TT:GameTooltipStatusBar_OnValueChanged(tt, value)
@@ -630,6 +670,8 @@ function TT:GameTooltip_OnTooltipSetItem(data)
 	if (bagCount or bankCount) and stackSize then
 		self:AddDoubleLine(' ', stackSize)
 	end
+
+	TT:ClampTooltipToScreen(self)
 end
 
 function TT:GameTooltip_AddQuestRewardsToTooltip(tt, questID)
@@ -736,6 +778,7 @@ function TT:GameTooltip_OnTooltipSetSpell(data)
 	end
 
 	self:AddLine(ID)
+	TT:ClampTooltipToScreen(self)
 	self:Show()
 end
 
