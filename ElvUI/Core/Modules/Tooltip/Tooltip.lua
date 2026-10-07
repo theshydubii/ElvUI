@@ -434,11 +434,10 @@ function TT:AddTargetInfo(tt, unit)
 end
 
 function TT:AddRoleInfo(tt, unit)
-	local tank, healer, damage = UnitGroupRolesAssigned(unit)
-	local role = (tank and 'TANK') or (healer and 'HEALER') or (damage and 'DAMAGER') or NONE
+	local role = UnitGroupRolesAssigned(unit) or NONE
 	local r, g, b = 1, 1, 1
 
-	if GetNumPartyMembers() > 0 and (UnitInParty(unit) or UnitInRaid(unit)) then
+	if UnitInParty(unit) or UnitInRaid(unit) then
 		if role == 'HEALER' then
 			role, r, g, b = _G.HEALER, 0, 1, .59
 		elseif role == 'TANK' then
