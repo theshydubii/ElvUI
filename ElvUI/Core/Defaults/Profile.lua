@@ -4468,6 +4468,7 @@ local AB_Bar = {
 	showGrid = true,
 	flyoutDirection = 'AUTOMATIC',
 	paging = {},
+	metamorphosisPaging = false,
 	countColor = { r = 1, g = 1, b = 1 },
 	countFont = 'Homespun',
 	countFontOutline = 'MONOCHROMEOUTLINE',
@@ -4527,7 +4528,6 @@ P.actionbar.bar1.enabled = true
 P.actionbar.bar1.visibility = ''
 
 P.actionbar.bar1.paging.ROGUE = '[bonusbar:1] 7; [bonusbar:2] 8;'
-P.actionbar.bar1.paging.WARLOCK = '[form:2] 7;'
 P.actionbar.bar1.paging.DRUID = '[bonusbar:1,nostealth] 7; [bonusbar:1,stealth] 8; [bonusbar:2] 10; [bonusbar:3] 9; [bonusbar:4] 10;'
 P.actionbar.bar1.paging.PRIEST = '[bonusbar:1] 7;'
 P.actionbar.bar1.paging.WARRIOR = '[bonusbar:1] 7; [bonusbar:2] 8; [bonusbar:3] 9;'

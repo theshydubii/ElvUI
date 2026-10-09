@@ -314,7 +314,14 @@ local function CreateBarOptions(num)
 
 	bar.args.pagingGroup.args.paging.get = function() return E.db.actionbar[barNumber].paging[E.myclass] end
 	bar.args.pagingGroup.args.paging.set = function(_, value) E.db.actionbar[barNumber].paging[E.myclass] = value AB:UpdateButtonSettings(barNumber) end
-	bar.args.pagingGroup.args.defaults.func = function() E.db.actionbar[barNumber].paging[E.myclass] = P.actionbar[barNumber].paging[E.myclass] AB:UpdateButtonSettings(barNumber) end
+	bar.args.pagingGroup.args.defaults.func = function()
+		E.db.actionbar[barNumber].paging[E.myclass] = P.actionbar[barNumber].paging[E.myclass]
+		if barNumber == 'bar1' then
+			E.db.actionbar.bar1.metamorphosisPaging = P.actionbar.bar1.metamorphosisPaging
+			AB:UpdateBar1Paging()
+		end
+		AB:UpdateButtonSettings(barNumber)
+	end
 	bar.args.pagingGroup.args.defaults.desc = function() return P.actionbar[barNumber].paging[E.myclass] end
 
 	bar.args.barGroup.args.flyoutDirection = ACH:Select(L["Flyout Direction"], nil, 3, { UP = L["Up"], DOWN = L["Down"], LEFT = L["Left"], RIGHT = L["Right"], AUTOMATIC = L["Automatic"] }, nil, nil, nil, function(info, value) E.db.actionbar[barNumber][info[#info]] = value AB:UpdateButtonSettings(barNumber) end)
@@ -345,3 +352,14 @@ end
 for i = 1, 10 do
 	CreateBarOptions(i)
 end
+
+local bar1Paging = ActionBar.args.playerBars.args.bar1.args.pagingGroup.args
+bar1Paging.metamorphosisPaging = ACH:Toggle(L["Metamorphosis Paging"], L["Change Action Bar 1 to page 11 while Metamorphosis is active."], 3, nil, nil, nil,
+	function() return E.db.actionbar.bar1.metamorphosisPaging end,
+	function(_, value)
+		E.db.actionbar.bar1.metamorphosisPaging = value
+		AB:UpdateBar1Paging()
+		AB:UpdateButtonSettings('bar1')
+	end,
+	nil,
+	function() return E.myclass ~= 'WARLOCK' end)

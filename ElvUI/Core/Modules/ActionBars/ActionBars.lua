@@ -63,10 +63,12 @@ AB.barDefaults = {
 }
 
 function AB:UpdateBar1Paging()
+	local metamorphosis = AB.db.bar1.metamorphosisPaging and '[bonusbar:5] 11; ' or ''
+
 	if AB.db.bar6.enabled then
-		AB.barDefaults.bar1.conditions = '[bonusbar:5] 11; [bar:3] 3; [bar:4] 4; [bar:5] 5; [bar:6] 6;'
+		AB.barDefaults.bar1.conditions = metamorphosis..'[bar:3] 3; [bar:4] 4; [bar:5] 5; [bar:6] 6;'
 	else
-		AB.barDefaults.bar1.conditions = '[bonusbar:5] 11; [bar:2] 2; [bar:3] 3; [bar:4] 4; [bar:5] 5; [bar:6] 6;'
+		AB.barDefaults.bar1.conditions = metamorphosis..'[bar:2] 2; [bar:3] 3; [bar:4] 4; [bar:5] 5; [bar:6] 6;'
 	end
 end
 
